@@ -64,3 +64,18 @@ def plotstats(df, col):
 ## Cell 7
 %matplotlib inline
 plotstats(frame, 'price')
+
+def auto_corr(df,colm):
+    import matplotlib.pyplot as plt
+    import pandas as pd
+    ##create a scatter plot of feature vs price
+    fig = plt.figure(1,figsize=(9,9))
+    ax = fig.gca()
+    df.plot(kind = 'scatter', x = 'price', y = colm, ax = ax)
+    ##compute the correlation and covariance and return the 
+    ##values as panda series
+    corr = df[['price',colm]].corr(method = 'pearson').as_matrix()[0][1]
+    cov = df[['price',colm]].cov().as_matrix()[0][1]
+    return pd.Series([corr,cov],index=['Correlation','Covariance'])
+
+auto_corr(frame,'engine-size')
