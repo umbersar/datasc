@@ -591,3 +591,50 @@ for(i in 1:9){
 }
 
 
+#integration using random numbers
+#what i do not understand here is the that why was mean used. We wanted the (count of numbers below the curve)/N where as what we are doing is (sum of numbers below the curve)/N
+#that is because of the way mean is being used...it is being used on a logical condtion(1 or 0). And is thus summing up the 1 and 0 s which will actually give the count of 1's. And thus
+#the mean of that is what we want. Example case showing the similarities is given below
+N <- 100000000
+x <- runif(N,0,2*pi)
+y <- runif(N,0,8)
+
+#asas <- c(1,2,3)
+#mean(asas>1)
+phat.under <- mean(y<exp(2*cos(x-pi)))
+phat.under * 16 * pi
+
+#asas <- c(1,2,3)
+#length(asas[asas>1])/N
+phat.under <- length(y[y<exp(2*cos(x-pi))])/N
+phat.under * 16 * pi
+
+#integration using numerical integrate function
+f <- function(x){exp(2*cos(x-pi))}
+integrate(f,0,2*pi)
+
+
+doone <- function(){
+  x <- rbinom(1,size = 50,prob = 1/6)  
+  p <- x/50
+  p
+}
+
+p.sim <- replicate(1000,doone())
+hist(p.sim,breaks = 15)
+
+
+x <- rnorm(1000)
+plot(density(x), xlim = c(-8,16))
+
+# mean shifted 8 units to the right..but the curve is similar other than that
+x <- rnorm(1000, mean = 8)
+lines(density(x), col="blue")
+
+#variation increase by increasing the sd value...so a bigger spread
+lines(density(rnorm(1000,sd=2)), col="red")
+lines(density(rnorm(1000,mean=8,sd=2)), col="green")
+
+#still more variation due to bigger sd value
+lines(density(rnorm(1000,sd=4)), col="purple")
+lines(density(rnorm(1000,mean=8,sd=4)), col="cyan")
