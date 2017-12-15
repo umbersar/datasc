@@ -1,3 +1,4 @@
+library(ggplot2)
 c(1,2,3) #vector
 1:5 #sequence which is internally a vector?
 ? typeof
@@ -638,3 +639,30 @@ lines(density(rnorm(1000,mean=8,sd=2)), col="green")
 #still more variation due to bigger sd value
 lines(density(rnorm(1000,sd=4)), col="purple")
 lines(density(rnorm(1000,mean=8,sd=4)), col="cyan")
+
+
+#Cleanse the ozone variable in the airquality data from missing values
+my.ozone<-airquality$Ozone[!is.na(airquality$Ozone) & airquality$Ozone>1]
+
+#my.ozone should be normally distributed, the best guess of the mean and standard deviation would be as follows
+mean.1<-mean(my.ozone)
+sd.1<-sd(my.ozone)
+
+
+#Simulate a number of normally distributed numbers with mean mean.1 and standard deviation sd.1, equal to the amount of data in my.ozone
+length(my.ozone)
+
+set.seed(55789)
+simulated.1<-rnorm(115,mean=mean.1,sd=sd.1)
+
+#Compare the simulated values with my.ozone through qqplot() 
+#qqplot(c(22,23,25),c(6,8,10))
+qqplot(simulated.1,my.ozone)
+lines(0:200,0:200,type="l",lwd=3,col="red")
+
+#use ggplot to display same
+#df <- data.frame(sim=c(22,23,25), nonsim=c(6,8,10))
+#ggplot(data = df, aes(x= sim, y= nonsim)) + geom_point(aes(colour=nonsim)) + geom_text(aes(x=sim-0.05, y=nonsim-0.15, label=df$sim))
+df <- data.frame(sim=simulated.1, nonsim=my.ozone)
+ggplot(data = df, aes(x=sim, y=nonsim))+ geom_point(aes(colour=nonsim)) + geom_text(aes(x=sim-0.25, y=nonsim-2.45, label=sprintf("%0.2f", round(df$sim, digits = 2)), size=1))+
+  geom_text(aes(x=sim-0.25, y=nonsim+2.45, label=sprintf("%0.2f", round(df$nonsim, digits = 2)), size=1))
