@@ -656,13 +656,96 @@ set.seed(55789)
 simulated.1<-rnorm(115,mean=mean.1,sd=sd.1)
 
 #Compare the simulated values with my.ozone through qqplot() 
-#qqplot(c(22,23,25),c(6,8,10))
+#so what we trying to do here is that we have generated/simulated normal distribution values and now are  trying to find plot the values on graph and to see if there
+#is linear correlation between the values(straight line). Shouldn't we have sorted the values in the 2 distributions before plotting??
+#after sorting I got the same plot but i do not know why i got the same result without sorting..Ans: Q-Q plots take your sample data, sort it in ascending order, and then plot them 
+#qqplot(c(23,22,25),c(16,8,10))
+#qqplot(sort(c(22,23,25)),sort(c(16,8,10)))
 qqplot(simulated.1,my.ozone)
 lines(0:200,0:200,type="l",lwd=3,col="red")
 
-#use ggplot to display same
-#df <- data.frame(sim=c(22,23,25), nonsim=c(6,8,10))
+qqplot(sort(simulated.1),sort(my.ozone))
+lines(0:200,0:200,type="l",lwd=3,col="red")
+
+#use ggplot to display same. Remember ggplot would not sort the data being plotted. So to get the same plot as qqplot, sort the data
+#df <- data.frame(sim=c(23,22,25), nonsim=c(16,8,10))
+#df <- data.frame(sim=sort(c(23,22,25)), nonsim=sort(c(16,8,10)))
 #ggplot(data = df, aes(x= sim, y= nonsim)) + geom_point(aes(colour=nonsim)) + geom_text(aes(x=sim-0.05, y=nonsim-0.15, label=df$sim))
-df <- data.frame(sim=simulated.1, nonsim=my.ozone)
+df <- data.frame(sim=sort(simulated.1), nonsim=sort(my.ozone))
 ggplot(data = df, aes(x=sim, y=nonsim))+ geom_point(aes(colour=nonsim)) + geom_text(aes(x=sim-0.25, y=nonsim-2.45, label=sprintf("%0.2f", round(df$sim, digits = 2)), size=1))+
   geom_text(aes(x=sim-0.25, y=nonsim+2.45, label=sprintf("%0.2f", round(df$nonsim, digits = 2)), size=1))
+
+
+#consider a log-transform of the data. It might be that data are at different scales. So take log of both arrays and then plot to see correlation. If my.ozone data was normally
+#distributed, it's plot against data from a nomally distribution would fit around a straight line. Wrong!!!that is now what we are trying to do here as we take exponential for plot!
+#If the log-transformed data should be normally distributed, a best guess on mean and standard deviation would be as follows:
+mean.2<-mean(log(my.ozone))
+sd.2<-sd(log(my.ozone))
+
+#now simulate the new values:
+set.seed(8942)
+simulated.2<-rnorm(115,mean=mean.2,sd=sd.2)
+
+#Compare the exponential to the simulated points with my.ozone in a qqplot
+qqplot(exp(simulated.2),my.ozone)
+lines(0:200,0:200,type="l",lwd=3,col="red")
+
+
+
+doone <- function(){
+  x <- sum(sample(1:6,2,replace=TRUE))
+  y<-sum(sample(1:6,x,replace=TRUE))
+  y
+}
+
+#simulate 1000 times
+set.seed(457778) 
+y.values<-replicate(1000,doone())
+hist(y.values) 
+box()
+summary(y.values)
+boxplot(y.values)
+
+
+a<-rnorm(3, mean=2, sd=1)
+b1<- c(3.373546, 4.183643, 3.164371)
+summary(b1)
+sd(b1)
+b2<- c(1.373546, 2.183643, 1.164371)
+summary(b2)
+sd(b2)
+b3<- c(5.373546, 6.183643, 5.164371 )
+summary(b3)
+sd(b3)
+b4<- c(-2.626454, -1.816357, -2.835629)
+summary(b4)
+sd(b4)
+#qqplot(a,b)
+#lines(0:50,0:50,type="l",lwd=3,col="red")
+
+
+
+
+n<-10000 
+doone <- function(){ 
+  x<-rbinom(1,50,1/6) 
+  p<-x/50 
+  p 
+} 
+p.sim<-replicate(n,doone())
+length(p.sim)
+summary(p.sim)
+
+n<-100000
+doone <- function(){ 
+  x<-rbinom(1,50,1/6) 
+  p<-x/50 
+  p 
+} 
+p.sim<-replicate(n,doone()) 
+hist(p.sim,breaks=20)
+
+
+a<-rnorm(1000, mean=5, sd=1) 
+hist(a)
+plot(density(a))
