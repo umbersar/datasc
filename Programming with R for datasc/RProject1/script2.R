@@ -749,3 +749,15 @@ hist(p.sim,breaks=20)
 a<-rnorm(1000, mean=5, sd=1) 
 hist(a)
 plot(density(a))
+
+
+my.data <- read.csv("Lab10.csv")
+summary(my.data)
+nrow(my.data)
+ncol(my.data)
+
+data1<-my.data$systolic.bp[my.data$Genotype=="BA"] 
+data2<-my.data$systolic.bp[my.data$Genotype=="BB"] 
+
+
+t.test()
