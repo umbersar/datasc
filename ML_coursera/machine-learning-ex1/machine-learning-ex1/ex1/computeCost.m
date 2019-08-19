@@ -13,9 +13,18 @@ J = 0;
 % Instructions: Compute the cost of a particular choice of theta
 %               You should set J to the cost.
 
+%keyboard
 
+%We can either do it iteratively using a loop as shown below.
+%for i = 1:m
+%  J = J + (y(i) - ( theta(1)*X(i,1)  + theta(2)*X(i,2) ))^2;
+%endfor
 
+%J = J/(2*m);
 
+%Or we can do it as matrix operation/vectorized version in a single line. 
+%We are dividing by 2 for only to make the derivative a bit cleaner
+J = sum(((y- X*theta).^2))/(2*m);
 
 % =========================================================================
 
