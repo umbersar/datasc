@@ -201,3 +201,15 @@ summary(poll$Info.On.Internet)
 table(poll$Info.On.Internet)
 summary(poll$Info.On.Internet == 0)
 summary(poll$Info.On.Internet == 11)
+
+summary(poll$Worry.About.Info)
+summary(!is.na(poll$Worry.About.Info))#790
+summary(poll$Worry.About.Info==1)#386
+table(limited$Worry.About.Info)#note that table does not give u data about na values
+
+table(poll$Anonymity.Possible)
+
+hist(limited$Age)
+plot(limited$Age, limited$Info.On.Internet)
+table(limited$Age, limited$Info.On.Internet)
+table(limited$Age, limited$Info.On.Internet) == max(table(limited$Age, limited$Info.On.Internet))
