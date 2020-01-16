@@ -213,3 +213,22 @@ hist(limited$Age)
 plot(limited$Age, limited$Info.On.Internet)
 table(limited$Age, limited$Info.On.Internet)
 table(limited$Age, limited$Info.On.Internet) == max(table(limited$Age, limited$Info.On.Internet))
+
+jitter(c(1, 2, 3))
+
+plot(limited$Age, limited$Info.On.Internet)
+plot(jitter(limited$Age), jitter(limited$Info.On.Internet))
+
+tapply(poll$Info.On.Internet, poll$Smartphone, summary)
+tapply(poll$Tried.Masking.Identity, poll$Smartphone, table)
+
+
+#linear regression
+wine =read.csv("wine.csv")
+str(wine);summary(wine)
+
+model1 =lm(Price~AGST, data = wine)
+str(model1); 
+summary(model1)
+
+model2 = lm(Price ~ AGST + HarvestRain, data=wine)
