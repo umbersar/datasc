@@ -9,4 +9,4 @@ ls()
 #tidylog
 #heatmaply
 
-w = read.csv('who.csv')
+#w = read.csv('who.csv')
