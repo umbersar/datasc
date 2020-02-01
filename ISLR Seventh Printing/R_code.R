@@ -52,3 +52,112 @@ dim(A[-c(1,3) ,-c(1,3,4)])
 
 Auto = ISLR::Auto
 fix(Auto)
+str(Auto)
+summary(Auto)
+attach((Auto))
+boxplot(Auto$cylinders , Auto$mpg )
+cylinders =as.factor (cylinders )
+plot(cylinders , mpg)
+plot(cylinders , mpg , col ="red ")
+plot(cylinders , mpg , col ="red", varwidth =T)
+plot(cylinders , mpg , col ="red", varwidth =T,horizontal =T)
+plot(cylinders , mpg , col ="red", varwidth =T, xlab=" cylinders ",
+     ylab ="MPG ")
+
+hist(mpg)
+hist(mpg ,col =2, breaks =15)
+pairs(Auto) #facet plot?
+pairs(~ mpg + displacement + horsepower + weight + acceleration , Auto)
+
+plot(horsepower ,mpg)
+identify (horsepower ,mpg ,name)
+
+dummyData=data.frame(rnorm (10000),rnorm (10000))
+
+college = ISLR::College
+fix(college)
+head(college)
+rownames(college)
+#college = college[,-1]
+fix(college)
+summary(college)
+pairs(college[,1:10])
+plot(college$Private,college$Outstate)
+college$Private= as.factor(college$Private)
+
+college$Elite = as.factor(college$Top10perc>50)
+summary(college$Elite)
+plot(college$Elite, college$Outstate)
+
+hist(college$Apps)
+hist(college$perc.alumni, col=2)
+hist(college$S.F.Ratio, col=3, breaks=10)
+hist(college$Expend, breaks=100)
+
+par(mfrow=c(1,1))
+plot(college$Outstate, college$Grad.Rate)
+# High tuition correlates to high graduation rate.
+plot(college$Accept / college$Apps, college$S.F.Ratio)
+# Colleges with low acceptance rate tend to have low S:F ratio.
+plot(college$Top10perc, college$Grad.Rate)
+# Colleges with the most students from top 10% perc don't necessarily have
+# the highest graduation rate. Also, rate > 100 is erroneous!
+
+auto = ISLR::Auto
+auto = na.omit(auto)
+summary(auto)
+sapply(auto[, 1:7], range)
+sapply(auto[, 1:7], mean)
+sapply(auto[, 1:7], sd)
+
+auto = auto[-(10:85),]
+dim(auto)
+sapply(auto[, 1:7], range)
+sapply(auto[, 1:7], mean)
+sapply(auto[, 1:7], sd)
+
+# (e)
+pairs(Auto)
+plot(Auto$mpg, Auto$weight)
+# Heavier weight correlates with lower mpg.
+plot(Auto$mpg, Auto$cylinders)
+# More cylinders, less mpg.
+plot(Auto$mpg, Auto$year)
+# Cars become more efficient over time.
+
+Boston = MASS::Boston
+?MASS::Boston
+pairs(bost)
+
+plot(Boston$age, Boston$crim)
+# Older homes, more crime
+plot(Boston$dis, Boston$crim)
+# Closer to work-area, more crime
+plot(Boston$rad, Boston$crim)
+# Higher index of accessibility to radial highways, more crime
+plot(Boston$tax, Boston$crim)
+# Higher tax rate, more crime
+plot(Boston$ptratio, Boston$crim)
+# Higher pupil:teacher ratio, more crime
+
+par(mfrow=c(1,3))
+hist(Boston$crim[Boston$crim>1], breaks=25)
+# most cities have low crime rates, but there is a long tail: 18 suburbs appear
+# to have a crime rate > 20, reaching to above 80
+hist(Boston$tax, breaks=25)
+# there is a large divide between suburbs with low tax rates and a peak at 660-680
+hist(Boston$ptratio, breaks=25)
+# a skew towards high ratios, but no particularly high ratios
+
+length(Boston$chas[Boston$chas==1])
+dim(subset(Boston, chas == 1))
+summary(Boston$ptratio)
+subset(Boston, medv == min(Boston$medv))
+t(subset(Boston, medv == min(Boston$medv)))
+
+length(Boston$rm[Boston$rm>7])
+dim(subset(Boston,rm>7))
+summary(subset(Boston,rm>8))
+summary(Boston)
+pairs(subset(Boston,rm>8))
+    
