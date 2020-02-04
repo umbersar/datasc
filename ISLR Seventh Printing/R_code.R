@@ -160,4 +160,5 @@ dim(subset(Boston,rm>7))
 summary(subset(Boston,rm>8))
 summary(Boston)
 pairs(subset(Boston,rm>8))
-    
+
+MASS::ad
