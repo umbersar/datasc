@@ -161,4 +161,9 @@ summary(subset(Boston,rm>8))
 summary(Boston)
 pairs(subset(Boston,rm>8))
 
-MASS::ad
+fix(Boston)
+bos = Boston
+write.csv(bos,file = 'c:/temp/boston.csv')
+model = lm(medv~lstat,bos)
+model
+summary(model)

@@ -1,0 +1,57 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+Read the titanic data set. And summarize it.
+```{r}
+tit_train = read.csv("C:/Users/sin17h/Documents/datasc/kaggle/Titanic_classify/train.csv")
+str(tit_train)
+summary(tit_train)
+```
+Summary tells us that:
+1. Passenger id has correlation with survivability or not. 
+   cor(tit_train$PassengerId,tit_train$Survived) is -0.005006661, so perhaps not
+
+2. nulls/NAs in Age column that we will deal later. how to deal: remove the rows or mean or 0 or use the parent-child info from the dataset to get the mean of that category.
+   length(tit_train$Age[is.na(tit_train$Age)]) is 177. removing the rows and using cor gave a value of -0.07722109 which is close to 0.
+   
+3. Name has a unique value for each observation. Can be disregarded as it should not have an affect on survivability. Check by making a plot. But first reduce the textual value to a number by coding it.
+
+```{r}
+cor(tit_train$PassengerId,tit_train$Survived)
+
+length(tit_train$Age[is.na(tit_train$Age)])
+cor(tit_train$Age,tit_train$Survived) #this wont work because of null values. so temporarily, use subset to sniff the relationship
+sb_tit = subset(tit_train,subset = !is.na(tit_train$Age))#this reduces the dataset to 714 rows.
+plot(sb_tit$Survived, sb_tit$Age)
+boxplot(sb_tit$Age~sb_tit$Survived)
+cor(sb_tit$Age,sb_tit$Survived) #-0.07722109. So perhaps its suggest that there is not correlation?
+
+plot(tit_train$Age)
+hist(tit_train$Age)
+boxplot(sb_tit$Age)
+plot(tit_train$Survived, tit_train$Age)
+boxplot(tit_train$Age~tit_train$Survived)
+
+cor(tit_train$Name,tit_train$Survived)# name has to be encoded
+plot(tit_train$Name,tit_train$Survived)
+
+```
+
+
+But now lets create a hist plot for each feature and then also facet chart
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+Before we 
+```{r}
+hist(tit_train$Survived)
+pairs(tit_train)
+```
+
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
