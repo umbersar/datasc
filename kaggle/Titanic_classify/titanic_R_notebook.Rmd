@@ -47,9 +47,19 @@ head(tit_train$Name)
 tit_train$Title <- gsub('(.*, )|(\\..*)', '', tit_train$Name)
 unique(Title)
 
-table(Title)
-table(tit_train$Sex,tit_train$Title)
+table(Title)#group by and count/length
+table(tit_train$Sex,tit_train$Title) #table is equivalent to groupby with implicit count/length using a case statement
+tapply(tit_train$Sex,tit_train$Title,length) # this is equivalent to table(Title). The equivalent group is has implicit count/length without case statement
+sort(tapply(tit_train$Sex,tit_train$Title,length))
 
+# Titles with very low cell counts to be combined to "rare" level
+rare_title = c('Dona', 'Lady', 'the Countess','Capt', 'Col', 'Don', 
+                'Dr', 'Major', 'Rev', 'Sir', 'Jonkheer')
+# Also reassign mlle, ms, and mme accordingly
+tit_train$Title[tit_train$Title == 'Mlle']        <- 'Miss' #update table where condition
+tit_train$Titletit_train[tit_train$Title == 'Ms']          <- 'Miss' #update table where condition
+tit_train$Title[tit_train$Title == 'Mme']         <- 'Mrs'  #update table where condition
+tit_train$Title[tit_train$Title %in% rare_title]  <- 'Rare Title' #update table where condition
 #a = subset(tit_train$Name, grepl("the Countess",tit_train$Name))
 #length(a)
 ```
