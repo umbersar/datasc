@@ -5,6 +5,9 @@ output: html_notebook
 
 ```{r}
 library(tidyverse)
+library(tidylog)
+library(heatmaply)
+getwd()
 ```
 
 
@@ -12,7 +15,7 @@ Try executing this chunk by clicking the *Run* button within the chunk or by pla
 
 Read the titanic data set. And summarize it.
 ```{r}
-tit_train = read.csv("C:/Users/sin17h/Documents/datasc/kaggle/Titanic_classify/train.csv")
+tit_train = read.csv("data/train.csv")
 str(tit_train)
 summary(tit_train)
 ```
@@ -24,9 +27,18 @@ Summary tells us that:
    length(tit_train$Age[is.na(tit_train$Age)]) is 177. removing the rows and using cor gave a value of -0.07722109 which is close to 0.
    
 ```{r}
-par(mfrow=c(3,3))
+# heatmaply_cor(
+#   cor(tit_train),
+#   xlab = "Features",
+#   ylab = "Features",
+#   k_col = 2,
+#   k_row = 2
+# )
+
 cor(tit_train$PassengerId,tit_train$Survived)
 
+
+par(mfrow=c(3,3))
 length(tit_train$Age[is.na(tit_train$Age)])
 cor(tit_train$Age,tit_train$Survived) #this wont work because of null values. so temporarily, use subset to sniff the relationship
 sb_tit = subset(tit_train,subset = !is.na(tit_train$Age))#this reduces the dataset to 714 rows.
@@ -60,9 +72,69 @@ tit_train$Title[tit_train$Title == 'Mlle']        <- 'Miss' #update table where 
 tit_train$Titletit_train[tit_train$Title == 'Ms']          <- 'Miss' #update table where condition
 tit_train$Title[tit_train$Title == 'Mme']         <- 'Mrs'  #update table where condition
 tit_train$Title[tit_train$Title %in% rare_title]  <- 'Rare Title' #update table where condition
+table(tit_train$Sex,tit_train$Title) 
+
+# Finally, grab surname from passenger name
+strsplit('Braund, Mr. Owen Harris', split = '[,.]')[[1]][1] #returns 'Braund'
+#this does not work as strsplit only works on strings whereas tit_train$Name is a factor. So first typecast it to character vector(aka string)
+#tit_train$Surname <- sapply(tit_train$Name, function(x) strsplit(x, split = '[,.]')[[1]][1])
+str(tit_train$Name); class(tit_train$Name)
+tit_train$Surname <- sapply(as.character(tit_train$Name), function(x) strsplit(x, split = '[,.]')[[1]][1])
+
+length(tit_train$Surname) #891
+length(unique(tit_train$Surname)) #667
+cat(paste('We have <b>', nlevels(factor(tit_train$Surname)), '</b> unique surnames. I would be interested to infer ethnicity based on surname --- another time.'))
+
 #a = subset(tit_train$Name, grepl("the Countess",tit_train$Name))
 #length(a)
 ```
+
+4. Let create a family size column
+```{r}
+tit_train$Fsize = tit_train$SibSp + tit_train$Parch + 1
+tit_train$Family = paste(tit_train$Surname, tit_train$Fsize, sep = "_")
+
+par(mfrow=c(2,2))
+plot(tit_train$Survived, tit_train$Fsize)
+boxplot(tit_train$Fsize~tit_train$Survived)
+hist(tit_train$Fsize[tit_train$Survived==1], breaks = 11)
+hist(tit_train$Fsize[tit_train$Survived==0], breaks = 11)
+summary(tit_train$Fsize[tit_train$Survived==1])
+summary(tit_train$Fsize[tit_train$Survived==0])
+
+par(mfrow=c(1,1))
+# Use ggplot2 to visualize the relationship between family size & survival. I could not produce a simialr plot with hist 
+# which can handle factor/levels
+ggplot(tit_train[1:891,], aes(x = Fsize, fill = factor(Survived))) +
+  geom_bar(stat='count', position='dodge') +
+  scale_x_continuous(breaks=c(1:11)) +
+  labs(x = 'Family Size') 
+  #+ theme_few()
+
+# Discretize family size
+tit_train$FsizeD[tit_train$Fsize == 1] <- 'singleton'
+tit_train$FsizeD[tit_train$Fsize < 5 & tit_train$Fsize > 1] <- 'small'
+tit_train$FsizeD[tit_train$Fsize > 4] <- 'large'
+
+# Show family size by survival using a mosaic plot. remeber table groups by and use count(or length agregate func). Sowhat we see 
+#here is the count of families with a case statement on family size
+mosaicplot(table(tit_train$FsizeD, tit_train$Survived), main='Family Size by Survival', shade=TRUE)
+# heatmaply(tit_train)
+```
+
+5. Now take a look at Cabin. It has a lot of empty string as value but they don't show up in summary.
+```{r}
+str(tit_train$Cabin)
+head(sort(tit_train$Cabin))
+tail(sort(tit_train$Cabin))
+
+training_tit = read.csv("data/test.csv")
+fix(training_tit)
+head(sort(training_tit$Cabin))
+tail(sort(training_tit$Cabin))
+summary(training_tit)
+```
+
 
 
 But now lets create a hist plot for each feature and then also facet chart
