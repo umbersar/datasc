@@ -1,8 +1,10 @@
 Sys.getlocale()
 # Sys.setlocale("LC_ALL", "C")
 getwd()
-setwd("C:/Users/sin17h/Downloads")
+setwd(paste(dirname(rstudioapi::getSourceEditorContext()$path), "/Data",sep =""))
 ls()
+
+
 
 #ggplots drag and drop plot builder
 #esquisse::esquisser()
@@ -137,7 +139,10 @@ sort(table(CPS$Citizenship))
 
 table(CPS$Race, CPS$Hispanic)
 h = subset(CPS, Hispanic=="1")
-sort(tapply(h$Age,h$Race,length))>250
+table(h$Age,h$Race)
+tapply(h$Age,h$Race,sum)#tapply is group by equivalent
+tapply(h$Age,h$Race,length)
+sort(tapply(h$Age,h$Race,sum))>250
 
 summary(CPS)
 

@@ -3,6 +3,11 @@ title: "R Notebook"
 output: html_notebook
 ---
 
+```{r}
+library(tidyverse)
+```
+
+
 Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
 
 Read the titanic data set. And summarize it.
@@ -18,9 +23,8 @@ Summary tells us that:
 2. nulls/NAs in Age column that we will deal later. how to deal: remove the rows or mean or 0 or use the parent-child info from the dataset to get the mean of that category.
    length(tit_train$Age[is.na(tit_train$Age)]) is 177. removing the rows and using cor gave a value of -0.07722109 which is close to 0.
    
-3. Name has a unique value for each observation. Can be disregarded as it should not have an affect on survivability. Check by making a plot. But first reduce the textual value to a number by coding it.
-
 ```{r}
+par(mfrow=c(3,3))
 cor(tit_train$PassengerId,tit_train$Survived)
 
 length(tit_train$Age[is.na(tit_train$Age)])
@@ -35,10 +39,19 @@ hist(tit_train$Age)
 boxplot(sb_tit$Age)
 plot(tit_train$Survived, tit_train$Age)
 boxplot(tit_train$Age~tit_train$Survived)
+```
+3. Name has a unique value for each observation. Can be disregarded as it should not have an affect on survivability. Check by making a plot. But first reduce the textual value to a number by coding it. options are: discard, hash to a numeric value or do feature engineering to extract create family linkages (using last name) 
+```{r}
+#cor(tit_train$Name,tit_train$Survived)# name has to be encoded
+head(tit_train$Name)
+tit_train$Title <- gsub('(.*, )|(\\..*)', '', tit_train$Name)
+unique(Title)
 
-cor(tit_train$Name,tit_train$Survived)# name has to be encoded
-plot(tit_train$Name,tit_train$Survived)
+table(Title)
+table(tit_train$Sex,tit_train$Title)
 
+#a = subset(tit_train$Name, grepl("the Countess",tit_train$Name))
+#length(a)
 ```
 
 

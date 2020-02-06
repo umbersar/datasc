@@ -167,3 +167,4 @@ write.csv(bos,file = 'c:/temp/boston.csv')
 model = lm(medv~lstat,bos)
 model
 summary(model)
+
