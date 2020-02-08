@@ -122,17 +122,20 @@ mosaicplot(table(tit_train$FsizeD, tit_train$Survived), main='Family Size by Sur
 # heatmaply(tit_train)
 ```
 
-5. Now take a look at Cabin. It has a lot of empty string as value but they don't show up in summary.
+5. Now take a look at Cabin. It has a lot of empty string as value but they don't show up in summary. In python, df.info() shows us the gives us a better insight as far as not-null data is concerned
 ```{r}
 str(tit_train$Cabin)
 head(sort(tit_train$Cabin))
 tail(sort(tit_train$Cabin))
+summary(tit_train$Cabin)#does not show empty strings.
+length(tit_train$Cabin[tit_train$Cabin == ''])#out of 891, we have 687 empty strings. So how we look for this anomaly?
+
 
 training_tit = read.csv("data/test.csv")
 fix(training_tit)
 head(sort(training_tit$Cabin))
 tail(sort(training_tit$Cabin))
-summary(training_tit)
+summary(training_tit$Cabin)
 ```
 
 
@@ -150,3 +153,5 @@ pairs(tit_train)
 When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
 
 The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+
