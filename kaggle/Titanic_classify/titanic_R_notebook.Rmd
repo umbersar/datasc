@@ -7,6 +7,13 @@ output: html_notebook
 library(tidyverse)
 library(tidylog)
 library(heatmaply)
+library(ggplot2)
+library(GGally)
+library('ggthemes') # visualization
+library('scales') # visualization
+library('dplyr') # data manipulation
+library('mice') # imputation
+library('randomForest') # classification algorithm
 getwd()
 ```
 
@@ -16,126 +23,172 @@ Try executing this chunk by clicking the *Run* button within the chunk or by pla
 Read the titanic data set. And summarize it.
 ```{r}
 tit_train = read.csv("data/train.csv")
+tit_test = read.csv("data/test.csv")
 str(tit_train)
 summary(tit_train)
+
+full = bind_rows(tit_train,tit_test)
+str(full)
+summary(full)
+#fix(full)
 ```
 Summary tells us that:
 1. Passenger id has correlation with survivability or not. 
-   cor(tit_train$PassengerId,tit_train$Survived) is -0.005006661, so perhaps not
+   cor(full$PassengerId,full$Survived) is -0.005006661, so perhaps not
 
-2. nulls/NAs in Age column that we will deal later. how to deal: remove the rows or mean or 0 or use the parent-child info from the dataset to get the mean of that category.
-   length(tit_train$Age[is.na(tit_train$Age)]) is 177. removing the rows and using cor gave a value of -0.07722109 which is close to 0.
+2. nulls/NAs in Age column that we will deal later. how to deal: remove the rows or mean(/median/mode) or 0 or use the parent-child info from the dataset to get the mean of that category.
+   length(full$Age[is.na(full$Age)]) is 177. removing the rows and using cor gave a value of -0.07722109 which is close to 0.
    
 ```{r}
 # heatmaply_cor(
-#   cor(tit_train),
+#   cor(full),
 #   xlab = "Features",
 #   ylab = "Features",
 #   k_col = 2,
 #   k_row = 2
 # )
 
-cor(tit_train$PassengerId,tit_train$Survived)
+cor(full$PassengerId,full$Survived)
 
 
 par(mfrow=c(3,3))
-length(tit_train$Age[is.na(tit_train$Age)])
-cor(tit_train$Age,tit_train$Survived) #this wont work because of null values. so temporarily, use subset to sniff the relationship
-sb_tit = subset(tit_train,subset = !is.na(tit_train$Age))#this reduces the dataset to 714 rows.
+length(full$Age[is.na(full$Age)])
+cor(full$Age,full$Survived) #this wont work because of null values. so temporarily, use subset to sniff the relationship
+sb_tit = subset(full,subset = !is.na(full$Age))#this reduces the dataset to 714 rows.
 plot(sb_tit$Survived, sb_tit$Age)
 boxplot(sb_tit$Age~sb_tit$Survived)
 cor(sb_tit$Age,sb_tit$Survived) #-0.07722109. So perhaps its suggest that there is not correlation?
 
-plot(tit_train$Age)
-hist(tit_train$Age)
+plot(full$Age)
+hist(full$Age)
 boxplot(sb_tit$Age)
-plot(tit_train$Survived, tit_train$Age)
-boxplot(tit_train$Age~tit_train$Survived)
+plot(full$Survived, full$Age)
+boxplot(full$Age~full$Survived)
 ```
 3. Name has a unique value for each observation. Can be disregarded as it should not have an affect on survivability. Check by making a plot. But first reduce the textual value to a number by coding it. options are: discard, hash to a numeric value or do feature engineering to extract create family linkages (using last name) 
 ```{r}
-#cor(tit_train$Name,tit_train$Survived)# name has to be encoded
-head(tit_train$Name)
-tit_train$Title <- gsub('(.*, )|(\\..*)', '', tit_train$Name)
-unique(Title)
+#cor(full$Name,full$Survived)# name has to be encoded
+head(full$Name)
+full$Title <- gsub('(.*, )|(\\..*)', '', full$Name)
+unique(full$Title)
 
-table(Title)#group by and count/length
-table(tit_train$Sex,tit_train$Title) #table is equivalent to groupby with implicit count/length using a case statement
-tapply(tit_train$Sex,tit_train$Title,length) # this is equivalent to table(Title). The equivalent group is has implicit count/length without case statement
-sort(tapply(tit_train$Sex,tit_train$Title,length))
+table(full$Title)#group by and count/length
+table(full$Sex,full$Title) #table is equivalent to groupby with implicit count/length using a case statement
+tapply(full$Sex,full$Title,length) # this is equivalent to table(Title). The equivalent group is has implicit count/length without case statement
+sort(tapply(full$Sex,full$Title,length))
 
 # Titles with very low cell counts to be combined to "rare" level
 rare_title = c('Dona', 'Lady', 'the Countess','Capt', 'Col', 'Don', 
                 'Dr', 'Major', 'Rev', 'Sir', 'Jonkheer')
 # Also reassign mlle, ms, and mme accordingly
-tit_train$Title[tit_train$Title == 'Mlle']        <- 'Miss' #update table where condition
-tit_train$Titletit_train[tit_train$Title == 'Ms']          <- 'Miss' #update table where condition
-tit_train$Title[tit_train$Title == 'Mme']         <- 'Mrs'  #update table where condition
-tit_train$Title[tit_train$Title %in% rare_title]  <- 'Rare Title' #update table where condition
-table(tit_train$Sex,tit_train$Title) 
+full$Title[full$Title == 'Mlle']        <- 'Miss' #update table where condition
+full$Title[full$Title == 'Ms']          <- 'Miss' #update table where condition
+full$Title[full$Title == 'Mme']         <- 'Mrs'  #update table where condition
+full$Title[full$Title %in% rare_title]  <- 'Rare Title' #update table where condition
+table(full$Sex,full$Title) 
 
 # Finally, grab surname from passenger name
 strsplit('Braund, Mr. Owen Harris', split = '[,.]')[[1]][1] #returns 'Braund'
-#this does not work as strsplit only works on strings whereas tit_train$Name is a factor. So first typecast it to character vector(aka string)
-#tit_train$Surname <- sapply(tit_train$Name, function(x) strsplit(x, split = '[,.]')[[1]][1])
-str(tit_train$Name); class(tit_train$Name)
-tit_train$Surname <- sapply(as.character(tit_train$Name), function(x) strsplit(x, split = '[,.]')[[1]][1])
+#this does not work as strsplit only works on strings whereas full$Name is a factor. So first typecast it to character vector(aka string)
+#full$Surname <- sapply(full$Name, function(x) strsplit(x, split = '[,.]')[[1]][1])
+str(full$Name); class(full$Name)
+full$Surname <- sapply(as.character(full$Name), function(x) strsplit(x, split = '[,.]')[[1]][1])
 
-length(tit_train$Surname) #891
-length(unique(tit_train$Surname)) #667
-cat(paste('We have <b>', nlevels(factor(tit_train$Surname)), '</b> unique surnames. I would be interested to infer ethnicity based on surname --- another time.'))
+length(full$Surname) #891
+length(unique(full$Surname)) #667
+cat(paste('We have <b>', nlevels(factor(full$Surname)), '</b> unique surnames. I would be interested to infer ethnicity based on surname --- another time.'))
 
-#a = subset(tit_train$Name, grepl("the Countess",tit_train$Name))
+#a = subset(full$Name, grepl("the Countess",full$Name))
 #length(a)
 ```
 
 4. Let create a family size column
 ```{r}
-tit_train$Fsize = tit_train$SibSp + tit_train$Parch + 1
-tit_train$Family = paste(tit_train$Surname, tit_train$Fsize, sep = "_")
+full$Fsize = full$SibSp + full$Parch + 1
+full$Family = paste(full$Surname, full$Fsize, sep = "_")
 
 par(mfrow=c(2,2))
-plot(tit_train$Survived, tit_train$Fsize)
-boxplot(tit_train$Fsize~tit_train$Survived)
-hist(tit_train$Fsize[tit_train$Survived==1], breaks = 11)
-hist(tit_train$Fsize[tit_train$Survived==0], breaks = 11)
-summary(tit_train$Fsize[tit_train$Survived==1])
-summary(tit_train$Fsize[tit_train$Survived==0])
+plot(full$Survived, full$Fsize)
+boxplot(full$Fsize~full$Survived)
+hist(full$Fsize[full$Survived==1], breaks = 11)
+hist(full$Fsize[full$Survived==0], breaks = 11)
+summary(full$Fsize[full$Survived==1])
+summary(full$Fsize[full$Survived==0])
 
 par(mfrow=c(1,1))
 # Use ggplot2 to visualize the relationship between family size & survival. I could not produce a simialr plot with hist 
 # which can handle factor/levels
-ggplot(tit_train[1:891,], aes(x = Fsize, fill = factor(Survived))) +
+ggplot(full[1:891,], aes(x = Fsize, fill = factor(Survived))) +
   geom_bar(stat='count', position='dodge') +
   scale_x_continuous(breaks=c(1:11)) +
   labs(x = 'Family Size') 
   #+ theme_few()
 
 # Discretize family size
-tit_train$FsizeD[tit_train$Fsize == 1] <- 'singleton'
-tit_train$FsizeD[tit_train$Fsize < 5 & tit_train$Fsize > 1] <- 'small'
-tit_train$FsizeD[tit_train$Fsize > 4] <- 'large'
+full$FsizeD[full$Fsize == 1] <- 'singleton'
+full$FsizeD[full$Fsize < 5 & full$Fsize > 1] <- 'small'
+full$FsizeD[full$Fsize > 4] <- 'large'
 
 # Show family size by survival using a mosaic plot. remeber table groups by and use count(or length agregate func). Sowhat we see 
 #here is the count of families with a case statement on family size
-mosaicplot(table(tit_train$FsizeD, tit_train$Survived), main='Family Size by Survival', shade=TRUE)
-# heatmaply(tit_train)
+mosaicplot(table(full$FsizeD, full$Survived), main='Family Size by Survival', shade=TRUE)
+# heatmaply(full)
 ```
 
 5. Now take a look at Cabin. It has a lot of empty string as value but they don't show up in summary. In python, df.info() shows us the gives us a better insight as far as not-null data is concerned
 ```{r}
-str(tit_train$Cabin)
-head(sort(tit_train$Cabin))
-tail(sort(tit_train$Cabin))
-summary(tit_train$Cabin)#does not show empty strings.
-length(tit_train$Cabin[tit_train$Cabin == ''])#out of 891, we have 687 empty strings. So how we look for this anomaly?
+str(full$Cabin)
+head(sort(full$Cabin))
+tail(sort(full$Cabin))
+summary(full$Cabin)#does not show empty strings.
+length(full$Cabin[full$Cabin == ''])#out of 891, we have 687 empty strings. So how we look for this anomaly?
 
+# Create a Deck variable. Get passenger deck A - F:
+full$Deck<-factor(sapply(as.character(full$Cabin), function(x) strsplit(x, NULL)[[1]][1]))
+str(full$Deck)
 
-training_tit = read.csv("data/test.csv")
-fix(training_tit)
-head(sort(training_tit$Cabin))
-tail(sort(training_tit$Cabin))
-summary(training_tit$Cabin)
+```
+6. Lets deal with missing data. The question remains: i have dont know a high level func that will point out the columns that have missing values in R dataframe.
+
+```{r}
+summary(full$Embarked)
+plot(!is.na(full$Embarked))
+which(full$Embarked=='')#we can build a custom func that loops around this to give us the desired result
+full$Embarked[63]
+full[c(62, 830), 'Embarked']
+cat(paste('We will infer their values for **embarkment** based on present data that we can imagine may be relevant: **passenger class** and **fare**. We see that they paid<b> $', full[c(62, 830), 'Fare'][1], '</b>and<b> $', full[c(62, 830), 'Fare'][2], '</b>respectively and their classes are<b>', full[c(62, 830), 'Pclass'][1], '</b>and<b>', full[c(62, 830), 'Pclass'][2], '</b>. So from where did they embark?'))
+
+full[c(62, 830), 'Fare'][[1]][1]
+full$Fare[c(62,830)][]
+full[62,]
+
+head(full)
+#lets see if we can infer the embark values from other rows
+pairs(~Fare + Pclass + Embarked ,full)
+plot(full$Embarked, full$Fare) 
+
+plot(full$Pclass, full$Fare)
+plot(as.factor(full$Pclass), full$Fare)
+plot(full$Pclass, full$Embarked)
+
+#what we can get using pair above is fine. But striaghtforwards way to plot on a single plot 3 with ggplot is:
+# Use ggplot2 to visualize embarkment, passenger class, & median fare
+#so they embarked from C
+ggplot(full, aes(x = Embarked, y = Fare, fill = factor(Pclass))) +
+  geom_boxplot() +
+  geom_hline(aes(yintercept=80), 
+    colour='red', linetype='dashed', lwd=2) +
+  scale_y_continuous(labels=dollar_format()) +
+  theme_few()
+
+full$Embarked[c(62, 830)] = 'C'
+```
+
+7. Fare also has  NA value.
+```{r}
+str(full$Fare)
+summary(full$Fare)
+full$Fare[is.na(full$Fare)]
 ```
 
 
@@ -145,8 +198,8 @@ But now lets create a hist plot for each feature and then also facet chart
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
 Before we 
 ```{r}
-hist(tit_train$Survived)
-pairs(tit_train)
+hist(full$Survived)
+pairs(full)
 ```
 
 
