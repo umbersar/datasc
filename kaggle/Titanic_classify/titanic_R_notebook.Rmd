@@ -148,11 +148,14 @@ full$Deck<-factor(sapply(as.character(full$Cabin), function(x) strsplit(x, NULL)
 str(full$Deck)
 
 ```
-6. Lets deal with missing data. The question remains: i have dont know a high level func that will point out the columns that have missing values in R dataframe.
+6. Lets deal with missing data. The que`stion remains: i have dont know a high level func that will point out the columns that have missing values in R dataframe.
 
 ```{r}
+par(mfrow=c(3,3))
+
+full$Embarked  = as.factor(full$Embarked)
 summary(full$Embarked)
-plot(!is.na(full$Embarked))
+plot(full$Embarked)
 which(full$Embarked=='')#we can build a custom func that loops around this to give us the desired result
 full$Embarked[63]
 full[c(62, 830), 'Embarked']
@@ -162,7 +165,6 @@ full[c(62, 830), 'Fare'][[1]][1]
 full$Fare[c(62,830)][]
 full[62,]
 
-head(full)
 #lets see if we can infer the embark values from other rows
 pairs(~Fare + Pclass + Embarked ,full)
 plot(full$Embarked, full$Fare) 
@@ -184,13 +186,39 @@ ggplot(full, aes(x = Embarked, y = Fare, fill = factor(Pclass))) +
 full$Embarked[c(62, 830)] = 'C'
 ```
 
-7. Fare also has  NA value.
+7. Fare also has NA value. replace the na value with median of sample with same class as this passenger as well as same embarkment point
 ```{r}
 str(full$Fare)
 summary(full$Fare)
-full$Fare[is.na(full$Fare)]
+which(is.na(full$Fare))
+full[1044,]
+sb = subset(full,full$Embarked=='S' & full$Pclass == 3)
+summary(sb$Fare)["Median"]
+plot(sb$Fare)
+hist(sb$Fare)#hist shows the distribution 
+ggplot(full[full$Pclass == '3' & full$Embarked == 'S', ], 
+  aes(x = Fare)) +
+  geom_density(fill = '#99d6ff', alpha=0.4) + 
+  geom_vline(aes(xintercept=median(Fare, na.rm=T)),
+    colour='red', linetype='dashed', lwd=1) +
+  scale_x_continuous(labels=dollar_format()) +
+  theme_few()
+
+full$Fare[1044] = summary(sb$Fare)["Median"]
+full$Fare[1044] = median(summary(sb$Fare))
+                         
 ```
 
+8. Now lets fix age variable which has
+```{r}
+
+# Show number of missing Age values
+sum(is.na(full$Age))
+#length(is.na(full$Age)) # length wont work here because we haven't filtered the rows 
+length(full$Age[is.na(full$Age)]) # but it would work if we filter the rows
+
+
+```
 
 
 But now lets create a hist plot for each feature and then also facet chart
