@@ -217,7 +217,9 @@ sum(is.na(full$Age))
 #length(is.na(full$Age)) # length wont work here because we haven't filtered the rows 
 length(full$Age[is.na(full$Age)]) # but it would work if we filter the rows
 
-
+plot(full$Age)
+hist(full$Age)
+summary(full$Age)
 ```
 
 
