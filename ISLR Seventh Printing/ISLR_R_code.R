@@ -168,3 +168,20 @@ model = lm(medv~lstat,bos)
 model
 summary(model)
 
+auto = ISLR::Auto
+model = lm(mpg~horsepower, auto)
+model
+summary(model)
+summary(model)$r.sq
+predict(model, data.frame(horsepower=c(98)), interval="confidence")
+predict(model, data.frame(horsepower=c(98)), interval="prediction")
+
+par(mfrow=c(1,1))
+plot(auto$horsepower, auto$mpg)
+abline(model)
+
+par(mfrow=c(2,2))
+plot(model)
+
+pairs(auto)
+cor(auto)

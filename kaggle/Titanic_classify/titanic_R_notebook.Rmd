@@ -361,3 +361,22 @@ When you save the notebook, an HTML file containing the code and output will be 
 The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
 
 
+```{python}
+# import pandas as pd
+# 
+# data = pd.read_csv("C:/Users/sin17h/Documents/datasc/kaggle/Titanic_classify/data/train.csv", sep = ",")
+# summary = data.describe(include="all")
+# summary = summary.transpose()
+# summary
+# x = data.info()
+# x
+# 
+# 
+# nsw = pd.read_csv("C:/Temp/nsw_json_webservice/sa5_lyr_p_tern_hm_191128.csv")
+# summary = nsw.describe(include="all")
+# summary = summary.transpose()
+# summary
+# 
+# x = nsw.info()
+```
+
