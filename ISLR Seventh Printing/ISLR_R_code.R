@@ -184,4 +184,52 @@ par(mfrow=c(2,2))
 plot(model)
 
 pairs(auto)
+
 cor(auto)
+auto_sb = subset(auto, select = -c(name))
+names(auto_sb)
+mat = cor(auto_sb)
+mat>.4
+mat[mat>.4]
+which(mat>.4, arr.ind = T)
+
+model = lm(mpg~.,auto_sb) #this is equivalent to following
+model = lm(mpg~.-name,auto)
+model
+summary(model)
+plot(model)
+plot(predict(model), rstudent(model))
+
+model2 = with(auto,lm(mpg~cylinders*displacement+displacement*weight))
+summary(model2)
+
+model3 = lm(mpg~log(weight)+sqrt(horsepower)+acceleration+I(acceleration^2), auto)
+summary(model3)
+par(mfrow=c(2,2))
+plot(model3)
+
+model4<-lm(log(mpg)~cylinders+displacement+horsepower+weight+acceleration+year+origin,data=auto)
+summary(model4)
+
+cs = ISLR::Carseats
+model = lm(Sales~Price+Urban+US,cs)
+summary(model)
+plot(model)
+str(cs$Urban)
+as.double(cs$Urban)
+
+model = lm(Sales~Price+as.double(Urban)+as.double(US),cs)
+summary(model)
+
+model = lm(Sales~Price+US,cs)
+summary(model)
+plot(model)
+
+confint(model)
+
+set.seed (1)
+x=rnorm (100)
+y=2*x+rnorm (100)
+
+model = lm(y~x+0)#linear regression without inercept.
+summary(model)
