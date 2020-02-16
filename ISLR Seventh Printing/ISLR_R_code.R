@@ -229,7 +229,184 @@ confint(model)
 
 set.seed (1)
 x=rnorm (100)
-y=2*x+rnorm (100)
+y=2*x+rnorm (10)
 
+par(mfrow=c(2,2))
 model = lm(y~x+0)#linear regression without inercept.
 summary(model)
+confint(model)
+plot(x,y) + abline(model)
+plot(model)
+
+model = lm(x~y+0)#linear regression without inercept.
+summary(model)
+plot(y,x) + abline(model)
+plot(model)
+
+
+set.seed(1)
+x = rnorm(100)
+y = 2*x
+lm.fit = lm(y~x+0)
+lm.fit2 = lm(x~y+0)
+summary(lm.fit)
+summary(lm.fit2)
+confint(lm.fit)
+
+set.seed(1)
+x <- rnorm(100)
+y <- -sample(x, 100)
+length(unique(y))#it is 100 because the item once removed from the sample by sampling is not put back again. It is a parameter of this func  
+
+# y <- -sample(x, 100, replace = TRUE)#by replacing the sample item back into the bin, the probability of same item getting sampled is not 0
+# length(unique(y))#it is < 100 
+
+sum(x^2)
+sum(y^2)
+lm.fit <- lm(y~x+0)
+lm.fit2 <- lm(x~y+0)
+summary(lm.fit)
+summary(lm.fit2)
+
+set.seed(1)
+x = rnorm(100, 0, sqrt(1))
+mean(x)
+sd(x)
+
+eps = rnorm(100, 0, sqrt(0.25))
+y = -1 + .5*x + eps
+length(y)
+plot(x,y)
+
+lm.fit = lm(y~x)
+summary(lm.fit)
+abline(lm.fit, lwd=3, col=2)
+abline(-1, 0.5, lwd=3, col=3)
+legend(-1, legend = c("model fit", "pop. regression"), col=2:3, lwd=3)
+
+
+lm.fit2 = lm(y~x + I(x^2))
+summary(lm.fit2)
+abline(lm.fit2, lwd=3, col=2)
+
+#less noise
+set.seed(1)
+x = rnorm(100, 0, sqrt(1))
+mean(x)
+sd(x)
+
+eps = rnorm(100, 0, sqrt(0.025))
+y = -1 + .5*x + eps
+length(y)
+plot(x,y)
+
+lm.fit = lm(y~x)
+summary(lm.fit)
+abline(lm.fit, lwd=3, col=2)
+abline(-1, 0.5, lwd=3, col=3)
+legend(-1, legend = c("model fit", "pop. regression"), col=2:3, lwd=3)
+
+
+lm.fit2 = lm(y~x + I(x^2))
+summary(lm.fit2)
+abline(lm.fit2, lwd=3, col=2)
+
+#more noise
+set.seed(1)
+x = rnorm(100, 0, sqrt(1))
+mean(x)
+sd(x)
+
+eps = rnorm(100, 0, sqrt(2.5))
+y = -1 + .5*x + eps
+length(y)
+plot(x,y)
+
+lm.fit = lm(y~x)
+summary(lm.fit)
+abline(lm.fit, lwd=3, col=2)
+abline(-1, 0.5, lwd=3, col=3)
+legend(-1, legend = c("model fit", "pop. regression"), col=2:3, lwd=3)
+
+
+lm.fit2 = lm(y~x + I(x^2))
+summary(lm.fit2)
+abline(lm.fit2, lwd=3, col=2)
+
+set.seed (1)
+x1=runif (100)
+x2 =0.5* x1+rnorm (100) /10
+y=2+2* x1 +0.3* x2+rnorm (100)
+plot(x1,x2)
+cor(x1,x2)
+
+lm.fit = lm(y~x1+x2)
+summary(lm.fit)
+
+lm.fit2 = lm(y~x1)
+summary(lm.fit2)
+
+lm.fit3 = lm(y~x2)
+summary(lm.fit3)
+
+
+x1 = c(x1, 0.1)
+x2 = c(x2, 0.8)
+y = c(y, 6)
+lm.fit1 = lm(y~x1+x2)
+summary(lm.fit1)
+lm.fit2 = lm(y~x1)
+summary(lm.fit2)
+lm.fit3 = lm(y~x2)
+summary(lm.fit3)
+
+library(MASS)
+summary(Boston)
+Boston$chas <- factor(Boston$chas, labels = c("N","Y"))
+summary(Boston)
+attach(Boston)
+lm.zn = lm(crim~zn)
+summary(lm.zn) # yes
+lm.indus = lm(crim~indus)
+summary(lm.indus) # yes
+lm.chas = lm(crim~chas) 
+summary(lm.chas) # no
+lm.nox = lm(crim~nox)
+summary(lm.nox) # yes
+lm.rm = lm(crim~rm)
+summary(lm.rm) # yes
+lm.age = lm(crim~age)
+summary(lm.age) # yes
+lm.dis = lm(crim~dis)
+summary(lm.dis) # yes
+lm.rad = lm(crim~rad)
+summary(lm.rad) # yes
+lm.tax = lm(crim~tax)
+summary(lm.tax) # yes
+lm.ptratio = lm(crim~ptratio)
+summary(lm.ptratio) # yes
+lm.black = lm(crim~black)
+summary(lm.black) # yes
+lm.lstat = lm(crim~lstat)
+summary(lm.lstat) # yes
+lm.medv = lm(crim~medv)
+summary(lm.medv) # yes
+
+lm.all = lm(crim~., data=MASS::Boston)
+summary(lm.all)
+
+x = c(coefficients(lm.zn)[2],
+      coefficients(lm.indus)[2],
+      coefficients(lm.chas)[2],
+      coefficients(lm.nox)[2],
+      coefficients(lm.rm)[2],
+      coefficients(lm.age)[2],
+      coefficients(lm.dis)[2],
+      coefficients(lm.rad)[2],
+      coefficients(lm.tax)[2],
+      coefficients(lm.ptratio)[2],
+      coefficients(lm.black)[2],
+      coefficients(lm.lstat)[2],
+      coefficients(lm.medv)[2])
+y = coefficients(lm.all)[2:14]
+plot(x, y)
