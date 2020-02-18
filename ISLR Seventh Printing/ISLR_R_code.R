@@ -414,13 +414,42 @@ plot(x, y)ta
 
 #chapter 4 classification
 sm = ISLR::Smarket
+attach(ISLR::Smarket)
 summary(sm)
 head(sm,2)
 str(sm)
 
 pairs(cor(sm[sapply(sm , is.numeric)]))
 a = cor(sm[sapply(sm , is.numeric)])
-(a>-.1)&(a<.1)
-a[(a>-.1)&(a<.1)]=""
-a
+(a>-.3)&(a>.3) 
+a[(a>-.3)&(a>.3)]=1
+a[!((a>-.3)&(a>.3))] = 0
+a#only year and volume shows a worthwhile correlation
+
+plot(sm$Year, sm$Volume)
+plot(as.factor(sm$Year), sm$Volume)
+boxplot(as.factor(sm$Year), sm$Volume)#it doesn't work but above works. So use plot for boxplots?? 
+
+#train the model on all the given data
+plot(sm$Volume)
+glm.fits=glm(Direction~Lag1+Lag2+Lag3+Lag4+Lag5+Volume, data=ISLR::Smarket, family=binomial)
+summary(glm.fits)
+
+#test the data using the same complete data set that was used for training. Not good practise
+glm.probs =predict(glm.fits,type ="response")
+glm.probs[1:10]
+contrasts(Direction)
+
+glm.pred=rep ("Down" ,1250)
+glm.pred[glm.probs >.5]="Up"
+table(glm.pred ,Direction)#confidence matrix
+
+(507+145) /1250
+mean(glm.pred == Direction)#fraction of days for which prediction was correct. Same as calculated above from confusion matrix.
+
+train =(Year <2005)
+Smarket.2005= ISLR::Smarket[! train ,] # can be done using subset as well 
+dim(subset(sm, !Year<2005))
+dim(Smarket.2005)
+Direction.2005= Direction[!train]
 
