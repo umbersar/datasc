@@ -409,4 +409,18 @@ x = c(coefficients(lm.zn)[2],
       coefficients(lm.lstat)[2],
       coefficients(lm.medv)[2])
 y = coefficients(lm.all)[2:14]
-plot(x, y)
+plot(x, y)ta
+
+
+#chapter 4 classification
+sm = ISLR::Smarket
+summary(sm)
+head(sm,2)
+str(sm)
+
+pairs(cor(sm[sapply(sm , is.numeric)]))
+a = cor(sm[sapply(sm , is.numeric)])
+(a>-.1)&(a<.1)
+a[(a>-.1)&(a<.1)]=""
+a
+
