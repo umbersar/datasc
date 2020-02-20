@@ -614,5 +614,22 @@ lda.pred.Directions = lda.pred$class
 table(lda.pred.Directions, test_ds$Direction)
 mean(lda.pred.Directions == test_ds$Direction)#correct prediction rate is 62.5%
 
-#now train using qda
-qda.model = qda(Direction~Lag2, data=Weekly, subset = train_ds)
+#now train using qda. Note that train_cond is supplied
+qda.model = qda(Direction~Lag2, data=Weekly, subset = train_cond)
+
+qda.pred = predict(qda.model,newdata = test_ds)
+qda.pred.class = qda.pred$class  
+table(qda.pred.class,test_ds$Direction)
+mean(qda.pred.class == test_ds$Direction)#58%. All the predictions were "Up"
+
+
+#model using KNN=1
+library (class)
+train.X=as.matrix(Lag2[train_cond])#could have also written train_ds$Lag2 but the length of vectors was different! How so?
+test.Y=as.matrix(Lag2[!train_cond])#could have also written test_ds$Lag2 
+train.Direction = Direction[train_cond]
+
+set.seed(1)
+knn.pred=knn(train = train.X, test = test.Y, train.Direction, k = 1)
+table(knn.pred, test_ds$Direction)
+mean(knn.pred == test_ds$Direction)#prediction rate is 57%
