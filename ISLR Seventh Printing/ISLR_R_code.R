@@ -556,3 +556,63 @@ table(knn.pred ,test.Y)
 knn.pred=knn(train.X,test.X,train.Y,k=5)
 table(knn.pred ,test.Y)
 #page 167 bookmark
+
+#excercise 10 page 171
+Weekly = ISLR::Weekly
+summary(Weekly)
+pairs(Weekly)
+
+#Weekly[,lapply(Weekly, is.numeric)] # this wont work because we want the apply function to return strings(as in columns names) 
+#which satisfy the condition. So we have to use the sapply equivalent.
+num_weekly = Weekly[,sapply(Weekly, is.numeric)]
+pairs(num_weekly)
+cors = cor(num_weekly)
+cors[(cors>.09 | cors < -.09 )] = 1
+cors[!(cors>.09 | cors < -.09 )] = 0
+cors
+plot(as.factor(num_weekly$Year), num_weekly$Volume)
+
+#the only correlation we see is between volume and year
+
+#b.create a model using full data set
+glm.model = glm(Direction~Lag1+Lag2+Lag3+Lag4+Lag5+Volume, data=ISLR::Weekly, family=binomial)
+glm.model
+summary(glm.model)
+
+glm.pred = predict(glm.model,Weekly, type = "response")
+glm.pred.Directions = rep("Down",nrow(Weekly))
+
+glm.pred.Directions[glm.pred>.5] = "Up"
+
+table(glm.pred.Directions, Weekly$Direction)#
+mean(glm.pred.Directions == Weekly$Direction)# correct prediction rate is 56%
+
+#total weeks the market goes up is 48+557 out of which we have predicted 557 times. 557/(557+48)= 92.1%.
+#54/(430+54) = 11.2% of the time market goes up but model predicts wrong.
+
+#this time divide the data set into train/test subsets
+train_cond = Weekly$Year %in% c(1990:2008)
+train_ds = Weekly[train_cond,]
+test_ds =  Weekly[!train_cond,]
+
+#train the logistic regression model
+glm.model = glm(Direction~Lag2,data=train_ds,family = binomial)
+
+#test the model
+glm.pred = predict(glm.model, test_ds, type = "response")
+glm.pred.Directions = rep("Down", nrow(test_ds))
+glm.pred.Directions[glm.pred>.5] = "Up"
+table(glm.pred.Directions, test_ds$Direction)
+mean(glm.pred.Directions == test_ds$Direction)#correct prediction rate is 62.5%
+
+#train the lda model
+lda.model = lda(Direction~Lag2,data=Weekly ,subset = train_cond)
+lda.pred = predict(lda.model,test_ds)
+
+#verify the prediction rates
+lda.pred.Directions = lda.pred$class
+table(lda.pred.Directions, test_ds$Direction)
+mean(lda.pred.Directions == test_ds$Direction)#correct prediction rate is 62.5%
+
+#now train using qda
+qda.model = qda(Direction~Lag2, data=Weekly, subset = train_ds)
