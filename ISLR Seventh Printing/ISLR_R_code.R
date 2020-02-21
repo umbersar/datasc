@@ -633,3 +633,78 @@ set.seed(1)
 knn.pred=knn(train = train.X, test = test.Y, train.Direction, k = 1)
 table(knn.pred, test_ds$Direction)
 mean(knn.pred == test_ds$Direction)#prediction rate is 57%
+
+#excercise 11 page 171
+Auto = ISLR::Auto
+Auto$mpg01[Auto$mpg > median(Auto$mpg)] = 1
+Auto$mpg01[!(Auto$mpg > median(Auto$mpg))] = 0
+Auto$mpg01
+
+auto_cor = cor(Auto[sapply(Auto,is.numeric)])
+pairs(Auto)
+positive_cor_cond = (auto_cor>.3)
+negative_cor_cond = (auto_cor< -.3)
+
+positive_cor_cond | negative_cor_cond    
+
+hist(Auto$year)#look at the data distribution to come up with a decent breakpoint
+is.element(FALSE, is.na(Auto$year))# FALSE %in% is.na(Auto$year)
+
+train_cond = Auto$year<76 # a better condition was (Auto$year %% 2 == 0) so that it sample the complete data set
+train_ds = subset(Auto,subset = train_cond)# similar to Auto[train_cond,] but i prefer subset
+test_ds = Auto[!train_cond,]
+
+#11.d lets use .5 as the cutoff for correlation. 
+positive_cor_cond = (auto_cor>.6)
+negative_cor_cond = (auto_cor< -.6)
+positive_cor_cond | negative_cor_cond    
+
+#this gives us 4 variables with high cor
+lda.model = lda(mpg01~cylinders+weight+displacement+horsepower,data = Auto, subset = train_cond)
+lda.pred = predict(lda.model,test_ds)
+
+table(lda.pred$class, test_ds$mpg01)
+mean(lda.pred$class != test_ds$mpg01)# 10.8% error rate
+
+#now lets change the condition used to split the dataset into train and test subsets
+train_cond = (Auto$year %% 2 == 0) #better sampling condition
+train_ds = subset(Auto,subset = train_cond)# similar to Auto[train_cond,] but i prefer subset
+test_ds = Auto[!train_cond,]
+
+
+#train and predict again
+#this gives us 4 variables with high cor
+lda.model = lda(mpg01~cylinders+weight+displacement+horsepower,data = Auto, subset = train_cond)
+lda.pred = predict(lda.model,test_ds)
+
+table(lda.pred$class, test_ds$mpg01)
+mean(lda.pred$class != test_ds$mpg01)# 12.6% error rate. So the error rate increased. hmm!
+
+#11.f logistic regression prediction. We are using the even year dataset splitting condition
+glm.model = glm(mpg01~cylinders+weight+displacement+horsepower, data = Auto, subset = train_cond, family = binomial)
+
+glm.probs = predict(glm.model,test_ds, type="response")
+glm.pred = rep("0",length(glm.probs))
+glm.pred[glm.probs>.5] = "1"
+
+mean(glm.pred != test_ds$mpg01)#12% error rate
+
+
+#11.g KNN
+train_cond = (Auto$year %% 2 == 0) #better sampling condition
+train_ds = subset(Auto, subset = train_cond, select = c(cylinders, weight, displacement, horsepower))# The same can be done using cbind(cylinders, weight, displacement, horsepower)[train,]
+test_ds = subset(Auto, subset = !train_cond, select = c(cylinders, weight, displacement, horsepower))#cbind(cylinders, weight, displacement, horsepower)[test,]
+label_ds_train = subset(Auto, subset = train_cond, select = c(mpg01))# this should have been equivalent to Auto$mpg01[train_cond] but it is not??
+label_ds_test = subset(Auto, subset = !train_cond, select = c(mpg01))
+#length(Auto$mpg01[train_cond])#210 length whereas above the length is 397. Why the difference
+#label_ds = Auto$mpg01[train_cond]
+
+set.seed(1)
+knn.pred = knn(train = train_ds, test = test_ds, cl = label_ds_train$mpg01, k=1)
+mean(knn.pred!=label_ds_test$mpg01)#error rate 15%
+
+knn.pred = knn(train = train_ds, test = test_ds, cl = label_ds_train$mpg01, k=10)
+mean(knn.pred!=label_ds_test$mpg01)#error rate 16.4%
+
+knn.pred = knn(train = train_ds, test = test_ds, cl = label_ds_train$mpg01, k=100)
+mean(knn.pred!=label_ds_test$mpg01)#error rate 14.3%
