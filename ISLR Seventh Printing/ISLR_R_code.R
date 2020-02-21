@@ -708,3 +708,22 @@ mean(knn.pred!=label_ds_test$mpg01)#error rate 16.4%
 
 knn.pred = knn(train = train_ds, test = test_ds, cl = label_ds_train$mpg01, k=100)
 mean(knn.pred!=label_ds_test$mpg01)#error rate 14.3%
+
+
+#excercise:12 page:172
+Power = function(x,a){
+  return(x^a)
+}
+Power(2,2)
+x = 1:10000
+plot(x,Power(x,2))
+x = 1:10
+plot(x, Power(x, 2),  log="x" )
+plot(x, Power(x, 2),  log="y" )
+plot(x, Power(x, 2),  log="xy", ylab="Log of y = x^2", xlab="Log of x",
+     main="Log of x^2 versus Log of x")
+
+PlotPower = function(x,y){
+  plot(x,Power(x,y))  
+}
+PlotPower(1:10,4)
