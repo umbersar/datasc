@@ -727,3 +727,64 @@ PlotPower = function(x,y){
   plot(x,Power(x,y))  
 }
 PlotPower(1:10,4)
+
+#page 191 chapter 5
+set.seed(1)
+Auto = ISLR::Auto
+dim(Auto)#has 392 rows
+row_indexes = sample(x=nrow(Auto),size=196)#this gives us random row indices that we can use into the df
+Auto[row_indexes,]
+#subset(x = Auto, subset = row_indexes) # since row_indexes is not a logical condition, we can't use it here. But we can use it as logical statement
+#in the statement below??
+lm.fit = lm(mpg~horsepower, data=Auto, subset = row_indexes)# same as Auto[row_indexes,]. So row_indexes is a conditions that can be used in subset 
+
+#now predict the response/label/output MSE by  exluding the training rows
+mean((Auto$mpg - predict (lm.fit ,Auto))[-row_indexes ]^2)#Since it is a regression and not a classification problem, we talk in terms of MSE and not error rate
+#in this case, the MSE is 26.14
+
+#now test using quadratic and cubic polynomial linear regressions (linear in terms of coefficients of the features)
+lm.fit = lm(mpg~poly(horsepower,2), data=Auto, subset = row_indexes)
+mean((Auto$mpg - predict (lm.fit ,Auto))[-row_indexes ]^2)#MSE for quadratic is 19.82
+
+lm.fit = lm(mpg~poly(horsepower,3), data=Auto, subset = row_indexes)
+mean((Auto$mpg - predict (lm.fit ,Auto))[-row_indexes ]^2)#MSE for quadratic is 19.78
+
+#now we can resample again (by setting a different seed this time) to get a different training set and running the model again would give different MSE
+set.seed(2)
+row_indexes = sample(x=nrow(Auto),size=196)#this gives us random row indices that we can use into the df
+
+lm.fit = lm(mpg~horsepower, data=Auto, subset = row_indexes)
+mean((Auto$mpg - predict (lm.fit ,Auto))[-row_indexes ]^2)#MSE for quadratic is 23.29
+
+lm.fit = lm(mpg~poly(horsepower,2), data=Auto, subset = row_indexes)
+mean((Auto$mpg - predict (lm.fit ,Auto))[-row_indexes ]^2)#MSE for quadratic is 18.90
+
+lm.fit = lm(mpg~poly(horsepower,3), data=Auto, subset = row_indexes)
+mean((Auto$mpg - predict (lm.fit ,Auto))[-row_indexes ]^2)#MSE for quadratic is 19.25
+
+
+#glm() function performs logistic regression when used with argument family="binomial". Without it, it performs linear regression
+#just like the lm() function. GLM stands for generalized linear model whereas lm stands for linear model  
+#cv.glm() function, part of boot package, gives cross validation results
+library (boot)
+glm.fit=glm(mpg~horsepower ,data=Auto)
+cv.err =cv.glm(Auto ,glm.fit)
+cv.err$delta
+
+cv.error=rep (0,5)
+for (i in 1:5){
+   glm.fit=glm(mpg~poly(horsepower ,i),data=Auto)
+   cv.error[i]=cv.glm (Auto, glm.fit)$delta [1]
+  }
+cv.error#decrease in ross validation error when we moved to quadratic but thereafter no decrease in error as we used higher polynomials
+
+
+set.seed (17)
+cv.error.10= rep (0 ,10)
+for (i in 1:10) {
+  glm.fit=glm(mpg~poly(horsepower ,i),data=Auto)
+  cv.error.10[i]=cv.glm (Auto, glm.fit, K=10) $delta [1]
+  }
+cv.error.10
+
+#page 194

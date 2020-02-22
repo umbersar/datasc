@@ -1,0 +1,96 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+library(tidyverse)
+library(tidylog)
+library(heatmaply)
+library(ggplot2)
+library(GGally)
+library('ggthemes') # visualization
+library('scales') # visualization
+library('dplyr') # data manipulation
+library('mice') # imputation
+library('randomForest') # classification algorithm
+```
+
+
+```{r}
+getwd()
+soils_ds = read.csv("hr_lr_labm_pivot.csv")
+head(soils_ds,2)
+fix(soils_ds)
+str(soils_ds)
+dim(soils_ds)#87521 rows and 586 columns
+```
+
+
+```{r}
+#it would have been better use the option na.strings=c("", "NA") while reading the file.
+#but after the file has been read, we can set all empty string to NA by foo[foo==""] <- NA
+
+#our label is soils_ds$h_texture and their are 20206 rows whose value we have to predict. So effectively we have 67K rows of sparse data
+length(soils_ds$h_texture[soils_ds$h_texture == ''])
+sum(is.na(soils_ds$h_texture)==TRUE)
+
+#lets find out what other columns are there that have blank strings as values. if the value in the 2nd column(number of blanks) is different 
+#from one in 3rd(number of nas)
+blank_cols = matrix(nrow = ncol(soils_ds), ncol = 3)
+for (i in 1:ncol(soils_ds)) {
+  blank_cols[i,1] = colnames(soils_ds)[i]
+  blank_cols[i,2] = length(soils_ds[,i][soils_ds[,i] == ''])  
+  blank_cols[i,3] = sum(is.na(soils_ds[,i] == TRUE))  
+}
+ 
+summary(soils_ds$X15J1)
+length(soils_ds$X15J1[soils_ds$X15J1 == ''])
+sum(is.na(soils_ds$X15J1)==TRUE)
+
+#set all empty strings to NA in this case
+soils_ds[soils_ds==''] = NA
+#rerun the blank check on all columns. The value in 2nd and 3rd col is same now.
+for (i in 1:ncol(soils_ds)) {
+  blank_cols[i,1] = colnames(soils_ds)[i]
+  blank_cols[i,2] = length(soils_ds[,i][soils_ds[,i] == ''])  
+  blank_cols[i,3] = sum(is.na(soils_ds[,i] == TRUE))  
+}
+
+head(blank_cols,10)
+
+```
+
+
+Remove cols which are not correlated
+```{r}
+cols_to_rm = c("agency_code", "proj_code", "s_id", "o_id", "h_no", "h_soil_water_stat", "samp_no", "labr_no")
+
+#can subert in 2 different ways to remove 8 colummns
+soils_ds=subset(x=soils_ds, select = -c(agency_code, proj_code, s_id, o_id, h_no,h_soil_water_stat,samp_no, labr_no))
+soils_ds=soils_ds[ , -which(names(soils_ds) %in% cols_to_rm)]
+head(soils_ds,2)
+```
+
+Now replace NA values in features with 0
+
+```{r}
+set_NA_0 = function(x){
+  x[is.na(x)==TRUE] = 0
+}
+soils_ds[,-1] = lapply(soils_ds[,-1], set_NA_0)
+head(soils_ds,2)
+```
+
+Now we can use the subset of ds which has values for texture
+```{r}
+soils_ds_no_texture = soils_ds[is.na(soils_ds$h_texture),]
+soils_ds_with_texture = soils_ds[!is.na(soils_ds$h_texture),]
+dim(soils_ds)
+dim(soils_ds_no_texture)
+dim(soils_ds_with_texture)#around 67k rows for us to train the model on
+
+```
+
