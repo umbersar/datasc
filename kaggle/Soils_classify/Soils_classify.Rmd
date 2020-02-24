@@ -23,7 +23,7 @@ library('randomForest') # classification algorithm
 getwd()
 soils_ds = read.csv("hr_lr_labm_pivot.csv")
 head(soils_ds,2)
-fix(soils_ds)
+#fix(soils_ds)
 str(soils_ds)
 dim(soils_ds)#87521 rows and 586 columns
 ```
@@ -92,5 +92,30 @@ dim(soils_ds)
 dim(soils_ds_no_texture)
 dim(soils_ds_with_texture)#around 67k rows for us to train the model on
 
+head(soils_ds_with_texture,2)
+#write.csv(x=soils_ds_with_texture,"soils_ds_with_texture.csv")
+```
+
+So the ds is now in reasonable form and we can run ML algos on it.
+
+```{r}
+row_indexes_train = sample(x=nrow(soils_ds_with_texture),size=nrow(soils_ds_with_texture)/2)
+row_indexes_test = !row_indexes_train
+length(row_indexes_train)
+anyNA(soils_ds_with_texture[row_indexes_train])
+```
+
+
+1) first we will try simple multi class logistic regression using 1/2 the rows for training.
+```{r}
+#lm.fit = glm(h_texture~., data = soils_ds_with_texture, subset = row_indexes_train, family = "multinomial")
+```
+
+2) try Support vector machine 
+```{r}
+library(caret)
+a = soils_ds_with_texture[row_indexes_train]
+svm.fit <- train(form = h_texture~., data = soils_ds_with_texture, subset = row_indexes_train, method = 'svmLinear3')
+svm.fit <- train(form = h_texture~., data = a, method = 'svmLinear3')
 ```
 
