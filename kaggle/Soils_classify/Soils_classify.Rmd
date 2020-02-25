@@ -10,12 +10,6 @@ library(tidyverse)
 library(tidylog)
 library(heatmaply)
 library(ggplot2)
-library(GGally)
-library('ggthemes') # visualization
-library('scales') # visualization
-library('dplyr') # data manipulation
-library('mice') # imputation
-library('randomForest') # classification algorithm
 ```
 
 
@@ -70,7 +64,7 @@ cols_to_rm = c("agency_code", "proj_code", "s_id", "o_id", "h_no", "h_soil_water
 
 #can subert in 2 different ways to remove 8 colummns
 soils_ds=subset(x=soils_ds, select = -c(agency_code, proj_code, s_id, o_id, h_no,h_soil_water_stat,samp_no, labr_no))
-soils_ds=soils_ds[ , -which(names(soils_ds) %in% cols_to_rm)]
+#soils_ds=soils_ds[ , -which(names(soils_ds) %in% cols_to_rm)]
 head(soils_ds,2)
 ```
 
@@ -93,6 +87,8 @@ dim(soils_ds_no_texture)
 dim(soils_ds_with_texture)#around 67k rows for us to train the model on
 
 head(soils_ds_with_texture,2)
+unique(soils_ds_with_texture$h_texture)
+sort(table(soils_ds_with_texture$h_texture))
 #write.csv(x=soils_ds_with_texture,"soils_ds_with_texture.csv")
 ```
 
