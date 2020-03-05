@@ -788,3 +788,155 @@ for (i in 1:10) {
 cv.error.10
 
 #page 194
+
+#page 198 excercise 2.g
+pr = function(n) return(1 - (1 - 1/n)^n)
+x = 1:100
+plot(x, pr(x))
+
+#5.1
+Default = ISLR::Default
+set.seed(1)
+glm.fit = glm(default~income+balance, data=Default, family=binomial)
+
+#5.2
+FiveB = function() {
+  # i.
+  train = sample(dim(Default)[1], dim(Default)[1]/2)
+  # ii.
+  glm.fit = glm(default~income+balance, data=Default, family=binomial,
+                subset=train)
+  # iii.
+  glm.pred = rep("No", dim(Default)[1]/2)
+  glm.probs = predict(glm.fit, Default[-train,], type="response")
+  glm.pred[glm.probs>.5] = "Yes"
+  # iv.
+  return(mean(glm.pred != Default[-train,]$default))
+}
+FiveB()
+
+#5.c
+FiveB()
+FiveB()
+FiveB()
+
+#5.d
+train = sample(dim(Default)[1], dim(Default)[1]/2)
+glm.fit = glm(default~income+balance+student, data=Default, family=binomial,
+              subset=train)
+glm.pred = rep("No", dim(Default)[1]/2)
+glm.probs = predict(glm.fit, Default[-train,], type="response")
+glm.pred[glm.probs>.5] = "Yes"
+mean(glm.pred != Default[-train,]$default)
+
+#6.a
+set.seed(1)
+glm.fit = glm(default~income+balance, data=Default, family=binomial)
+summary(glm.fit)
+
+#6.b
+boot.fn = function(data, index)
+  return(coef(glm(default~income+balance, data=data, family=binomial,
+                  subset=index)))
+#6.c
+library(boot)
+boot(Default, boot.fn, 50)
+
+#7.a
+Weekly=ISLR::Weekly
+glm.fit = glm(Direction~Lag1+Lag2, data=Weekly, family=binomial)
+summary(glm.fit)
+
+glm.fit = glm(Direction~Lag1+Lag2, data=Weekly, family=binomial, subset = c(-1))
+summary(glm.fit)
+
+glm.fit = glm(Direction~Lag1+Lag2, data=Weekly[-1,], family=binomial)
+summary(glm.fit)
+
+#7.c
+predict.glm(glm.fit, Weekly[1,], type="response") > 0.5
+
+#7.d
+#Here we used a loop to calculate loocv. you can also use cv.glm to calculate loocv error as shown below.
+#remember that K-fold CV is LOOCV with K (the number of folds) equal to N (the number of training observations).
+count = rep(0, dim(Weekly)[1])
+for (i in 1:(dim(Weekly)[1])) {
+  glm.fit = glm(Direction~Lag1+Lag2, data=Weekly[-i,], family=binomial)
+  is_up = predict.glm(glm.fit, Weekly[i,], type="response") > 0.5
+  is_true_up = Weekly[i,]$Direction == "Up"
+  if (is_up != is_true_up)
+    count[i] = 1
+}
+sum(count)
+
+#7.e
+mean(count)#LOOCV estimates a test error rate of 45%. 
+
+#8.a
+set.seed(1)
+y = rnorm(100)
+x = rnorm(100)
+y = x - 2*x^2 + rnorm(100)
+
+#8.b
+plot(x, y)
+
+#8.c
+set.seed(1)
+Data = data.frame(x,y)
+
+#now these are you can also use cv.glm to calculate loocv error. Above we used a loop to calculate loocv
+# i.
+glm.fit = glm(y~x)
+cv.glm(Data, glm.fit)$delta #by default cv.glm uses a k=n parameter value
+# ii.
+glm.fit = glm(y~poly(x,2))
+cv.glm(Data, glm.fit)$delta
+# iii.
+glm.fit = glm(y~poly(x,3))
+cv.glm(Data, glm.fit)$delta
+# iv.
+glm.fit = glm(y~poly(x,4))
+cv.glm(Data, glm.fit)$delta
+
+#8.f
+#this also tells you that the second order polynomial was most significant 
+summary(glm.fit)
+
+#9.a
+set.seed(1)
+library(MASS)
+summary(Boston)
+medv.mean = mean(Boston$medv)
+
+#9.b
+medv.err = sd(Boston$medv) / sqrt(length(Boston$medv))
+medv.err
+
+#9.c
+boot.fn = function(data, index) return(mean(data[index]))
+library(boot)
+bstrap = boot(Boston$medv, boot.fn, 1000)
+bstrap
+
+#9.d
+t.test(Boston$medv)
+c(bstrap$t0 - 2*0.4119, bstrap$t0 + 2*0.4119)
+
+#9.e
+medv.med = median(Boston$medv)
+medv.med
+
+#9.f
+boot.fn = function(data, index) return(median(data[index]))
+boot(Boston$medv, boot.fn, 1000)
+
+#9.g
+medv.tenth = quantile(Boston$medv, c(0.1))
+medv.tenth
+
+#9.h
+boot.fn = function(data, index) return(quantile(data[index], c(0.1)))
+boot(Boston$medv, boot.fn, 1000)
+
+#chapter 6. page 203
