@@ -8,21 +8,22 @@ c(1,2,3) #vector
 ? rgamma #gamma distribution using random no.s rgamma(5,shape=2, rate=2)
 ? rbinom #binomial distribution using random no.s rbinom(5,size=100, prob=.3)
 ? rmultinom #multi nominal distribution using random no.s rmultinom(5,size=100, prob=c(.3,.2,.5))
-? runif #uniform distribution using random no.s runif(5,min=1, max=2)
+? runif #uniform distribution using random no.s runif(5,min=1, max=2). Normal distribution 
+#is gaussian distribution
 
 ? c #this is the concatenate function to produce a vector, not cat
 ? cat # catalogue function like print. Can also redirect output to a file
 ? paste # is for concatenating cahracter vectors. Like a '+' for string
 ? lapply #output is list. also tapply given below
 ? sapply #output is vector or matrix. sapply(df,class). also tapply given below
-#data.frame(5:7, c(14, 12, 13))  note that what u specify in dataframe constructor is equal length columns. Matrix can also
-#be used to instantiate data.frame if the constructor of matrix is more useful for a use case.
+#data.frame(5:7, c(14, 12, 13))  note that what u specify in dataframe constructor is equal length columns. 
+#Matrix can also be used to instantiate data.frame if the constructor of matrix is more useful for a use case.
 ? seq
 ? rep
 ? rbind # this takes inputs which becomes rows
 ? cbind # this takes inputs which becomes columns
 ? matrix # this takes one long vector and then you supply shape to transform the vector into the matrix
-? mode
+? mode ;mode("Name");mode(2)#gives you storage mode. character,numeric, etc.
 ? length
 ? dim
 ? nrow
@@ -47,13 +48,15 @@ c(1,2,3) #vector
 ? sink #redirects output to a file instead of command prompt
 ? dump #serializes the R objects to a file. But this is ascii serialization.
 ? source # deserialize the r objects from a file. But this is ascii de-serialization.
-? dput #dput and dget also do something similar as dump and source but with some differences. But this is ascii serialization.
-? dget #dput and dget also do something similar as dump and source but with some differences. But this is ascii serialization.
+? dput #dput and dget also do something similar as dump and source but with some differences. 
+#But this is ascii serialization.
+? dget #dput and dget also do something similar as dump and source but with some differences. 
+#But this is ascii serialization.
 ? save # serialize in r-binary format
 ? load # de-serialize in r-binary format
 ? ls #list r objects from workspace
 ? rm # remove r objects from workspace
-? library(RODBC) # sql data connections
+? library(RODBC) # sql data connections. odbc library is more efficient that rodbc
 ? merge #merge dataframes..sort of like inner join
 ? names #names(df) gets col names
 ? class #class of df column, i.e., numeric or factor, etc.
