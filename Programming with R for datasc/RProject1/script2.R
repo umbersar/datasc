@@ -61,6 +61,7 @@ c(1,2,3) #vector
 ? names #names(df) gets col names
 ? class #class of df column, i.e., numeric or factor, etc.
 ? str #str(df) gets object structure 
+?fix
 #logical indexing df[df$temp>90,c("temp","rain")]. can also use subset for this
 ?subset #subset(df, temp>80, select=c(temp,rain))
 #subset(df, temp>80, select = -temp)
@@ -72,13 +73,19 @@ c(1,2,3) #vector
 ? sub
 ? table
 ? log  
-? tapply #tapply(df$height, df$gender, mean). could also be done by aggregate(height~gender, df, mean) AND by(df$height, df$gender, mean)
-#tapply(df$height, list(df$gender, df$tmt), mean). could also be done by aggregate(height~gender+tmt, df, mean) AND by(df$height, list(df$gender, df$tmt), mean).
-#but the way the output is returned is different for tapply, aggregate and by. But for large datasets, tapply is the fastest and aggregate the slowest
-#note the difference between these 3 functions with table. Also similar is xtabs 
+? tapply #tapply(df$height, df$gender, mean). could also be done by 
+#aggregate(height~gender, df, mean) AND by(df$height, df$gender, mean)
+
+#tapply(df$height, list(df$gender, df$tmt), mean). could also be done by aggregate
+#(height~gender+tmt, df, mean) AND by(df$height, list(df$gender, df$tmt), mean).
+#but the way the output is returned is different for tapply, aggregate and by. But for large 
+#datasets, tapply is the fastest and aggregate the slowest. Note the difference between
+#these 3 functions with table. Also similar is xtabs 
+
 ? aggregate(height~gender, df, mean) #see tapply
 ? by(df$height, df$gender, mean)  #see tapply
-? attach #attached datasets so that you do have to refer them by name. But it has it's issues around hiding names. So avoid
+? attach #attached datasets so that you do have to refer them by name. But it has it's issues 
+#around hiding names. So avoid
 ? detach
 ? with #temporary attach
 ? searchpaths
@@ -88,12 +95,17 @@ c(1,2,3) #vector
 ? dplyr  
 ? par # par(mfrow=c(3,3))
 
-x <- rnorm(10000)
+x <- rnorm(10000)#normal distribution(different from Uniform/Gaussian)
+fix(x)
+View(x)
 head(x)
 mean(x)
 var(x)
 #p<-ggplot2::ggplo
-t(data=x) + ggplot2::geom_histogram()
+hist(x)
+x + ggplot2::geom_histogram()
+ggplot2::geom_histogram(x)
+t(x) + ggplot2::geom_histogram()
 
 mean(exp(rnorm(100000)))
 
@@ -115,13 +127,13 @@ c(-0.4, -2.6) / my.vector * 100
 x <- rnorm(100, mean = .5, sd = .3)
 mean(x)
 sd(x)
-histogram(x)
+hist(x)
 
 set.seed(1234)
 x <- rnorm(100, mean = .5, sd = .3)
 mean(x)
 sd(x)
-histogram(x,axes=FALSE)
+hist(x,axes=FALSE)
 hist(x, axes = FALSE, ylab="")
 axis(4)
 axis(1)
@@ -162,6 +174,7 @@ data.frame(5:7, c("rr", "ss", "ff")) + 2
 myfunc <- function(v) {
     return (v - mean(v)) / sd(v)
 }
+
 myfunc(1:5)
 a <- rnorm(1000)
 mean(a)
@@ -172,10 +185,11 @@ fofx <- function(x) {
     3 * sin(x / 2) + x
 }
 
+?plot.function
 plot(fofx, -7, 7)
 matrix(c(5, 4, 3, 2, 1, 0) + 2, nrow = 2) < 5
 sin
-? cat
+? cat #concatenate and print
 ? density
 ? hist
 ? "if"
@@ -184,7 +198,7 @@ sin
 
 summary(a)
 sd(a)
-?? skewed
+??skewed
 
 my.display <- function(x, display = FALSE, type, prob) {
     cat("Summary of input: \n")
@@ -298,7 +312,9 @@ dim(A)
 sum(A)
 
 sum(sum(A[, 1]))
-sum(A[row <= column]) # A, row and column are 3 different matrices. c how other matrices themselves are used to index into a separate matrix(that too in a condition!)
+sum(A[row <= column]) # A, row and column are 3 different matrices. c how 
+#other matrices themselves are used to index into a separate matrix(that too
+#in a condition!)
 
 
 x <- 1:3
