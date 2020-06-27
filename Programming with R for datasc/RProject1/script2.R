@@ -19,7 +19,8 @@ c(1,2,3) #vector
 #data.frame(5:7, c(14, 12, 13))  note that what u specify in dataframe constructor is equal length columns. 
 #Matrix can also be used to instantiate data.frame if the constructor of matrix is more useful for a use case.
 ? seq
-? rep
+? rep #replicates the values
+? replicate # replicate(n=100, simmie.1()) # repeatedly call the function n times.
 ? rbind # this takes inputs which becomes rows
 ? cbind # this takes inputs which becomes columns
 ? matrix # this takes one long vector and then you supply shape to transform the vector into the matrix
@@ -316,7 +317,6 @@ sum(A[row <= column]) # A, row and column are 3 different matrices. c how
 #other matrices themselves are used to index into a separate matrix(that too
 #in a condition!)
 
-
 x <- 1:3
 y <- seq(4, 8)
 z <- rep(9:10, 1)
@@ -349,7 +349,8 @@ length(my.negative.values)
 summary(my.negative.values)
 
 my.data.frame <- read.table("data.exercise5.1.dat", header = TRUE, skip = 1)
-my.data.frame <- read.table("data.exercise5.2.dat", skip = 2, header = TRUE, sep = ";", dec = ",")
+my.data.frame <- read.table("data.exercise5.2.dat", skip = 2, header = TRUE, 
+                            sep = ";", dec = ",")
 
 my.data.frame <- read.csv("Exercise 5.3.csv", na.strings = c("","NA"), skip = 2)[, -1]
 is.na(my.data.frame[4, 8])
@@ -360,7 +361,8 @@ my.data.frame <- read.table("Exercise 5.4a.txt", header = TRUE, skip = 2)
 dimnames(my.data.frame)[[2]] <- c("", "", "")
 
 l <- levels(unlist(read.table("Exercise 5.4a.txt", header = F, skip = 1, nrows = 1)))
-dimnames(my.data.frame)[[2]] <- levels(unlist(read.table("Exercise 5.4a.txt", header = F, skip = 1, nrows = 1)))[2:length(l)]
+dimnames(my.data.frame)[[2]] <- levels(unlist(read.table("Exercise 5.4a.txt", header = F,
+                                                         skip = 1, nrows = 1)))[2:length(l)]
 
 f1 <- file("Exercise 5.4a.txt", open = "r")
 my.names <- scan(f1, what = "", nlines = 1, skip = 1)
@@ -385,7 +387,8 @@ set.seed(9007)
 my.data <- data.frame(x = rnorm(10), y = rnorm(10) + 5, z = rchisq(10, 1))
 additional.data <- data.frame(x = rnorm(3), y = rnorm(3) + 5, z = rchisq(3, 1))
 write.table(my.data, "Exercise 6.1.txt", row.names = FALSE, col.names = FALSE)
-write.table(additional.data, "Exercise 6.1.txt", row.names = FALSE, col.names = FALSE, append = T)
+write.table(additional.data, "Exercise 6.1.txt", row.names = FALSE, 
+            col.names = FALSE, append = T)
 
 set.seed(45)
 my.data <- data.frame(x = rnorm(10), y = rnorm(10), z = rnorm(10))
@@ -415,7 +418,7 @@ write.table(round(my.data,digits = 2),"Assignment 6a.txt",row.names=FALSE)
 write.table(format(my.data,digits = 20),"Assignment 6b.txt",row.names=FALSE)
 #options(digits=20)
 
-library(RODBC)
+library(RODBC)#use the new odbc driver as it is faster
 connStr <- paste(
   "Server=msedxeus.database.windows.net",
   "Database=DAT209x01",
@@ -447,6 +450,7 @@ names(my.data.frame)<-c("SUM(Revenue)","SUM(Units)","ProductID")
 order(my.data.frame["ProductID"],decreasing = T)
 my.data.frame$ProductID[order(my.data.frame$"SUM(Units)",decreasing=TRUE)][1:5]
 my.data.frame$ProductID[order(my.data.frame$"SUM(Revenue)",decreasing=TRUE)][1:5]
+my.data.frame[order(my.data.frame$"SUM(Revenue)",decreasing=TRUE),]
 
 data.frame.x<-data.frame(names=c("Gretha","Robert","John","Heather"),
                          age=c(30,18,25,70),
@@ -459,9 +463,10 @@ data.frame.y<-data.frame("Person_name"=c("William","Nancy","Charlotte","Henry"),
 data.frame.z<-merge(data.frame.x,data.frame.y)
 data.frame.z<-merge(data.frame.y,data.frame.x,
                     by.x=c("Person_name","age"),
-                    by.y=c("names","age"),all=TRUE)
+                    by.y=c("names","age"),all=TRUE)#outer join as all=TRUE
 
-s<-subset(airquality,!is.na(Ozone) & !is.na(Solar.R))#just keep in mind complete rows are being removed here
+#just keep in mind complete rows are being removed here just like a SQL where clause
+s<-subset(airquality,!is.na(Ozone) & !is.na(Solar.R))
 colMeans(s)
 mean(airquality$Solar.R, na.rm = T)
 
@@ -512,7 +517,7 @@ by(df$height, df$gender, mean)
 
 #presidents is timeseries, not df
 cycle(presidents) 
-tapply(presidents,cycle(presidents),mean,na.rm=T)
+tapply(presidents,cycle(presidents),mean,na.rm=T)#bookmark:20200626
 time(presidents)
 frequency(presidents)
 deltat(presidents)
