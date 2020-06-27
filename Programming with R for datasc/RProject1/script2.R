@@ -516,15 +516,17 @@ aggregate(height~gender, df, mean)
 by(df$height, df$gender, mean)
 
 #presidents is timeseries, not df
+presidents
 cycle(presidents) 
-tapply(presidents,cycle(presidents),mean,na.rm=T)#bookmark:20200626
+tapply(presidents,cycle(presidents),mean,na.rm=T)
 time(presidents)
 frequency(presidents)
 deltat(presidents)
 
 searchpaths()
 
-
+#cut converts numeric to factor by dividing the input range into interval.
+#sort of like bin'ing for a histogram
 tapply(airquality$Solar.R , cut(airquality$Wind,10), mean,na.rm=TRUE)
 
 a <- table(airquality$Ozone>80, airquality$Month)
@@ -532,7 +534,11 @@ a
 a2 <- addmargins(a)
 a2
 
+#return proportions wrt the given dimension
 a3 <-prop.table(a,2)
+a3
+# a3 <-prop.table(a,1)
+# a3
 
 addmargins(a3)
 round(addmargins(a3)*100)
@@ -595,35 +601,49 @@ prop.table(margin.table(my.table, c(1,3)),2)
 
 plot(rnorm(10000))
 
-par(mfrow=c(3,3))
+par(mfrow=c(2,2))
 set.seed(779)
 
-# plot 9 histograms of 12 simulated standard normally distributed numbers. Add the density of the standard normal to the plot with the curve() function.
-#as we increase the sample size, the distribution is visibly more normal. Not to say that the low sample sizes did not contains numbers from a normal distribution.
-for(i in 1:9){
+# plot 4 histograms of 12 simulated standard normally distributed numbers. Add 
+#the density of the standard normal to the plot with the curve() function.
+#as we increase the sample size, the distribution is visibly more normal. Not to
+#say that the low sample sizes did not contains numbers from a normal distribution.
+for(i in 1:4){
   hist(rnorm(12), probability=TRUE,main=paste("Histogram",i))
   curve(dnorm,add=TRUE,col="red",lwd=3)
 }
 
-for(i in 1:9){
+for(i in 1:4){
   hist(rnorm(25), probability=TRUE,main=paste("Histogram",i))
   curve(dnorm,add=TRUE,col="red",lwd=3)
 }
 
-for(i in 1:9){
+for(i in 1:4){
   hist(rnorm(10000), probability=TRUE,main=paste("Histogram",i))
   curve(dnorm,add=TRUE,col="red",lwd=3)
 }
 
 
-#integration using random numbers
-#what i do not understand here is the that why was mean used. We wanted the (count of numbers below the curve)/N where as what we are doing is (sum of numbers below the curve)/N
-#that is because of the way mean is being used...it is being used on a logical condtion(1 or 0). And is thus summing up the 1 and 0 s which will actually give the count of 1's. And thus
-#the mean of that is what we want. Example case showing the similarities is given below
-N <- 100000000
+#integration using random numbers. What we are doing here is trying to integrate a
+#function between 0 and 2*pi. So we do a monte-carlo simulation to generate uniform(gaussian)
+#distribution between the given integration limits and then find proportion of numbers 
+#from that distribution that fall under the curve we are trying to integrate. As we 
+#increase the number of points in the distribution, we get closer to
+#expected answer.
+#what i do not understand here is the that why was mean used. We wanted 
+#the (count of numbers below the curve)/N where as what we are doing 
+#is (sum of numbers below the curve)/N
+#that is because of the way mean is being used...it is being used on a logical
+#condtion(1 or 0). And is thus summing up the 1 and 0 s which will actually give
+#the count of 1's. And thus the mean of that is what we want. Example case 
+#showing the similarities is given below
+N <- 100
 x <- runif(N,0,2*pi)
 y <- runif(N,0,8)
 
+#do not plot as the points in distribution increase as it would just hang.
+plot(x,y)
+plot(x,exp(2*cos(x-pi)))
 #asas <- c(1,2,3)
 #mean(asas>1)
 phat.under <- mean(y<exp(2*cos(x-pi)))
@@ -668,21 +688,27 @@ lines(density(rnorm(1000,mean=8,sd=4)), col="cyan")
 #Cleanse the ozone variable in the airquality data from missing values
 my.ozone<-airquality$Ozone[!is.na(airquality$Ozone) & airquality$Ozone>1]
 
-#my.ozone should be normally distributed, the best guess of the mean and standard deviation would be as follows
+#my.ozone should be normally distributed, the best guess of the mean and 
+#standard deviation would be as follows
 mean.1<-mean(my.ozone)
 sd.1<-sd(my.ozone)
 
 
-#Simulate a number of normally distributed numbers with mean mean.1 and standard deviation sd.1, equal to the amount of data in my.ozone
+#Simulate a number of normally distributed numbers with mean mean.1 and standard 
+#deviation sd.1, equal to the amount of data in my.ozone
 length(my.ozone)
 
 set.seed(55789)
 simulated.1<-rnorm(115,mean=mean.1,sd=sd.1)
 
 #Compare the simulated values with my.ozone through qqplot() 
-#so what we trying to do here is that we have generated/simulated normal distribution values and now are  trying to find plot the values on graph and to see if there
-#is linear correlation between the values(straight line). Shouldn't we have sorted the values in the 2 distributions before plotting??
-#after sorting I got the same plot but i do not know why i got the same result without sorting..Ans: Q-Q plots take your sample data, sort it in ascending order, and then plot them 
+#so what we trying to do here is that we have generated/simulated normal distribution 
+#values and now are  trying to find plot the values on graph and to see if there
+#is linear correlation between the values(straight line). Shouldn't we have sorted the 
+#values in the 2 distributions before plotting??
+#after sorting I got the same plot but i do not know why i got the same result without
+#sorting..Ans: Q-Q plots take your sample data, sort it in ascending order, and then 
+#plot them 
 #qqplot(c(23,22,25),c(16,8,10))
 #qqplot(sort(c(22,23,25)),sort(c(16,8,10)))
 qqplot(simulated.1,my.ozone)
@@ -691,18 +717,26 @@ lines(0:200,0:200,type="l",lwd=3,col="red")
 qqplot(sort(simulated.1),sort(my.ozone))
 lines(0:200,0:200,type="l",lwd=3,col="red")
 
-#use ggplot to display same. Remember ggplot would not sort the data being plotted. So to get the same plot as qqplot, sort the data
+#use ggplot to display same. Remember ggplot would not sort the data being plotted. 
+#So to get the same plot as qqplot, sort the data
 #df <- data.frame(sim=c(23,22,25), nonsim=c(16,8,10))
 #df <- data.frame(sim=sort(c(23,22,25)), nonsim=sort(c(16,8,10)))
 #ggplot(data = df, aes(x= sim, y= nonsim)) + geom_point(aes(colour=nonsim)) + geom_text(aes(x=sim-0.05, y=nonsim-0.15, label=df$sim))
 df <- data.frame(sim=sort(simulated.1), nonsim=sort(my.ozone))
-ggplot(data = df, aes(x=sim, y=nonsim))+ geom_point(aes(colour=nonsim)) + geom_text(aes(x=sim-0.25, y=nonsim-2.45, label=sprintf("%0.2f", round(df$sim, digits = 2)), size=1))+
-  geom_text(aes(x=sim-0.25, y=nonsim+2.45, label=sprintf("%0.2f", round(df$nonsim, digits = 2)), size=1))
+ggplot(data = df, aes(x=sim, y=nonsim))+ geom_point(aes(colour=nonsim)) 
+                + geom_text(aes(x=sim-0.25, y=nonsim-2.45, 
+                label=sprintf("%0.2f", round(df$sim, digits = 2)), size=1))+
+          geom_text(aes(x=sim-0.25, y=nonsim+2.45, 
+                    label=sprintf("%0.2f", round(df$nonsim, digits = 2)), size=1))
 
 
-#consider a log-transform of the data. It might be that data are at different scales. So take log of both arrays and then plot to see correlation. If my.ozone data was normally
-#distributed, it's plot against data from a nomally distribution would fit around a straight line. Wrong!!!that is now what we are trying to do here as we take exponential for plot!
-#If the log-transformed data should be normally distributed, a best guess on mean and standard deviation would be as follows:
+#consider a log-transform of the data. It might be that data are at different scales. 
+#So take log of both arrays and then plot to see correlation. If my.ozone data was normally
+#distributed, it's plot against data from a nomally distribution would fit around a 
+#straight line. Wrong!!!that is now what we are trying to do here as we take 
+#exponential for plot!
+#If the log-transformed data should be normally distributed, a best guess on 
+#mean and standard deviation would be as follows:
 mean.2<-mean(log(my.ozone))
 sd.2<-sd(log(my.ozone))
 
@@ -711,9 +745,11 @@ set.seed(8942)
 simulated.2<-rnorm(115,mean=mean.2,sd=sd.2)
 
 #Compare the exponential to the simulated points with my.ozone in a qqplot
+#why did we take the exponential here?? because we generated simulated data
+#from which scaled down(using log) ozone data. So now to compare them, we have to take
+#exp of simulated data to cancel out the log (i think).
 qqplot(exp(simulated.2),my.ozone)
 lines(0:200,0:200,type="l",lwd=3,col="red")
-
 
 
 doone <- function(){
@@ -774,7 +810,6 @@ a<-rnorm(1000, mean=5, sd=1)
 hist(a)
 plot(density(a))
 
-
 my.data <- read.csv("Lab10.csv")
 summary(my.data)
 nrow(my.data)
@@ -784,6 +819,7 @@ data1<-my.data$systolic.bp[my.data$Genotype=="BA"]
 data2<-my.data$systolic.bp[my.data$Genotype=="BB"] 
 
 testResult <- t.test(data1,data2)
+testResult
 
 plot(density(data1))
 lines(density(data2))
@@ -791,6 +827,7 @@ lines(density(data2))
 n1 <- length(my.data[my.data$Genotype=="BA",c("Genotype")])
 
 testResult <- t.test(runif(26,min=1, max=2),data2)
+testResult
 
 set.seed(1234)
 my.new.data<-my.data
