@@ -1,3 +1,5 @@
+#vector is homogenous in terms of its member types (like array in c++). Same in case of r matrix
+#list is like a generic collection where members can have different types. Same in case of r df
 library(ggplot2)
 c(1,2,3) #vector
 1:5 #sequence which is internally a vector?
@@ -24,6 +26,10 @@ c(1,2,3) #vector
 ? rbind # this takes inputs which becomes rows
 ? cbind # this takes inputs which becomes columns
 ? matrix # this takes one long vector and then you supply shape to transform the vector into the matrix
+#include the drop=FALSE argument in all your matrix manipulation code
+#this dimension reduction problem is also prevalent in dataframes
+#the other problem in dataframes is auto conversion of string to factors. For that use stringsAsFactors=FALSE
+#or as.is=TRUE
 ? mode ;mode("Name");mode(2)#gives you storage mode. character,numeric, etc.
 ? length
 ? dim
@@ -95,6 +101,13 @@ c(1,2,3) #vector
 ? ftable
 ? dplyr  
 ? par # par(mfrow=c(3,3))
+?example #runs the code in help section for the specified keyword/operator
+?ifelse #one line vectorized conditional statement. It can be nested as well:ifelse inside of ifelse 
+
+example(seq)  
+example("&")
+example("hist")
+example(persp)
 
 x <- rnorm(10000)#normal distribution(different from Uniform/Gaussian)
 fix(x)
@@ -187,7 +200,51 @@ fofx <- function(x) {
 }
 
 ?plot.function
-plot(fofx, -7, 7)
+example("plot.function")
+# there are 2 ways to plot a function. One is the evaluate the function first and then plot it's
+#results. Other is to pass the function and the parameters it expects to the plot function and
+#let the plot evaluate the func
+g <- function(t) { return ((t^2+1)^0.5) }  # define g()
+x <- seq(0,5,length=10000)  # x = [0.0004, 0.0008, 0.0012,..., 5]
+y <- g(x)  # y = [g(0.0004), g(0.0008), g(0.0012), ..., g(5)]
+plot(x,y,type="l")
+
+plot.function(g,from = 0, to=5, n=50000)#n is the number of steps between 'from' and 'to'
+
+
+plot(fofx, from = -7, to = 7)
+plot(fofx, from = -7, to = 7, n=5)#the plot is not smooth
+plot(fofx, from = -7, to = 7, n=15)#the plot is now smooth as number of steps is increased
+ggplot(data = data.frame(x = 0), mapping=aes(x=x)) +
+  stat_function(fun=fofx, color="blue") + xlim(-7,7)
+
+g1 <- function(x) return(sin(x))
+g2 <- function(x) return(sqrt(x^2+1))
+g3 <- function(x) return(2*x-1)
+plot(c(0,1),c(-1,1.5))  
+# prepare the graph, specifying X and Y ranges> 
+for (f in c(g1,g2,g3)) plot(f,0,1,add=T)  # add plot to existing graph
+
+?nlm #gives you the function minimum. You can also plot the function to visually look the min
+func<-function(x) return(x^2-sin(x))
+nlm(func,8)#minimum value was found to be approximately −0.23, occurring at x = 0.45
+plot.function(func,from = -100,to = 100)
+plot.function(func,from = -100,to = 100, n=100000)#n is the number of steps between from and to. 
+#Default is 101 steps i think. Increasing the n would make the plot smoother if it is wavy.
+dx2x <- deriv(~ x^2, "x") ; dx2x
+
+#you can also plot a 3d surface
+library(lattice)
+a <- 1:10
+b <- 1:15
+eg <- expand.grid(x=a,y=b)
+eg$z <- eg$x^2 + eg$x * eg$y
+wireframe(z ~ x+y, eg)
+wireframe(z ~ x+y, eg, shade=T)
+cloud(z ~ x+y, eg)
+
+
+
 matrix(c(5, 4, 3, 2, 1, 0) + 2, nrow = 2) < 5
 sin
 ? cat #concatenate and print
@@ -839,7 +896,6 @@ new.data2<-my.new.data$systolic.bp[my.new.data$Genotype=="BB"]
 t.test(new.data1,new.data2)$statistic
 
 
-
 my.new.data<-my.data
 my.new.data$Genotype<-"BB"
 doone<-function(){
@@ -852,3 +908,24 @@ doone<-function(){
 set.seed(554)
 my.t.values<-replicate(100000,doone())
 mean((1*(my.t.values)^2>2.027021^2))
+
+df<-replicate(n=10,rnorm(2))
+mx_df <-apply(df,2,max,drop=FALSE)
+mean(mx_df)
+
+
+#heatmap of a matrix color coded according to a condition
+library('plot.matrix') 
+a<-data.frame(rnorm(10),rnorm(10),rnorm(10),rnorm(10))
+a<-as.matrix(a)
+edit(a)
+plt<-ifelse(a>.5,1,0)
+# par(mar=c(5.1, 4.1, 4.1, 4.1))
+plot(plt)
+
+#can also use image to produce a similar heatmap to visualize the values in a matrix
+mat1 <- apply(plt, 2, rev)#this is visualizing the condition result on matrix values
+image(t(mat1))
+
+mat1 <- apply(a, 2, rev)#this is visualizing the matrix values
+image(t(a))
