@@ -1,0 +1,71 @@
+---
+title: "ML Courseara R Notebook"
+output: html_notebook
+---
+
+Terminology: Features(input vars), labels(output/target var), hypothesis, classification: prediction of discrete label values (if labels are strings, we encode them as numbers for ML), clustering: prediction of continuous numeric label values
+
+Traditional mathematical modeling starts with a equation and then tries to tune the parameters/coefficients
+of the model to best fit the observed data. In ML 'modelling' we just use the data to make
+predictions without creating an equation first. Some ML approaches like regression will output
+the parameters/coefficients so that the mathematical equation can be created to explain the model whereas for others like neural networks the output can't be easily explained (or a mathematical equation created)
+
+Linear equation for one feature:
+y = f(x) = b + mx where b is intercept and m is slope. These are the tuning parameters/coefficients we have to predict. This equation can also be written in ML parlance as:
+H(x) = $θ_0 +θ_1*x$ where theta0 is intercept and theta1 is slope. And these parameters are what we have to find
+
+Linear equation for 3 features:
+H(x) = $θ_0 +θ_1*x_1 +θ_2*x_2 +θ_3*x_3$ 
+
+Now to do linear regression, we have the training data set which means we have values for features x1 to xN for different observations, the corresponding label values and we have to find the values of thetas. E.g.
+$θ_0 +θ_1*x_{1,1} +θ_2*x_{1,2}$ = 112
+$θ_0 +θ_1*x_{2,1} +θ_2*x_{2,2}$ = 201
+$θ_0 +θ_1*x_{3,1} +θ_2*x_{3,2}$ = 169
+
+Filling in the example feature values, it becomes:
+$θ_0 +θ_1*6 +θ_2*2$ = 112
+$θ_0 +θ_1*3 +θ_2*7$ = 201
+$θ_0 +θ_1*5 +θ_2*3$ = 169
+
+This system of linear equations can also be written as product of two matrices(we created a dummy feature with value 1 for all observations to be able to use matrix product):
+1 6 2   θ_0 = 112
+1 3 7 * θ_1 = 201
+1 5 3   θ_2 = 169
+
+Now what we have is a system of linear equations. Why do we need Linear regression to solve this and why can't we use linear equation solver for the answer?? I think a solution has to exist if we have to use linear equation solver to get the result. A solution will exist if these 3 planes(lines in case of 2 dimensions. Here we have 3 dimensions and thus we have a plane for each equation and solution exists if the 3 planes intersect) intersect at a point. If they do not intersect, no solution exists. In that case, linear regression will still up with the values of thetas/parameters/coefficients that minimize the loss
+
+```{r}
+#Try to solve using 
+feature_matrix <- matrix(c(1,6,2,1,3,7,1,5,3),nrow=3,ncol=3,byrow = T)
+#parameter_vector is what we have to find
+label_vector = c(112,201,169)
+parameter_vector <- solve(feature_matrix,label_vector)#this gives the value of thetas to be 782 -98 -41
+library(matlib)
+plotEqn3d(A=feature_matrix,b=label_vector)
+
+
+#Test if these theta values do solve the system of linear equation.
+feature_matrix%*%parameter_vector#this does the matrix multiplication to get the result which is same as the label vector
+
+#this toy system shows the plane intersection clearly for 3-dimensional system of equations.
+A <- matrix(c(13, -4, 2, -4, 11, -2, 2, -2, 8), 3,3)
+b <- c(1,2,4)
+plotEqn3d(A,b)
+
+#now solve the above problem using linear regression
+features_and_labels <- cbind(feature_matrix,label_vector)
+features_and_labels <- as.data.frame(features_and_labels)#lm expects the features and labels in same dataframe. Note how we only passed in the the actual features (x1 and x2) and not the dummy x0 feature for the intercept but we do get the parameter/coefficient for it.
+names(features_and_labels) <- c("x0","x1","x2","labels")
+lm_obj <- lm(label_vector~x1+x2,features_and_labels)#this give the same output as linear equations solver.
+# Coefficients:
+# (Intercept)           x1           x2  
+#         782          -98          -41
+
+
+#TODO: Now come up with an example where the linea equation solver fails but linear regression succeeds.
+
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+

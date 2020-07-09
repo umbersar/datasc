@@ -1,0 +1,61 @@
+---
+title: "R_SQL_performance_cheatsheet"
+output: html_notebook
+---
+```{r}
+library(stats)
+library(ISLR)
+library(MASS)
+
+tit_train = read.csv("C:/Users/sin17h/Documents/datasc/kaggle/Titanic_classify/data/train.csv")
+tit_test = read.csv("C:/Users/sin17h/Documents/datasc/kaggle/Titanic_classify/data/test.csv")
+
+tit_train$Title <- gsub('(.*, )|(\\..*)', '', tit_train$Name)
+
+```
+
+Ingest data into SQL server
+```{r}
+
+library(DBI)
+library(odbc)
+sort(unique(odbcListDrivers()[[1]]))
+
+con <- dbConnect(odbc::odbc(), 
+                 Driver = "SQL Server", 
+                 Server = "localhost\\sql2019", 
+                 Database = "Titanic", 
+                 Trusted_Connection = "True")
+
+dbWriteTable(con, "tit_train", tit_train)
+```
+
+```{r}
+
+table(tit_train$Title)
+#equivalent SQL
+# select Title, count(*) as cnt
+# from tit_train
+# group by Title
+
+table(tit_train$Sex, tit_train$Title)
+# select Title
+#       ,count(case when Sex='female' then 1 else 0 end) as 'female'
+#       ,count(case when Sex='male' then 1 else 0 end) as 'female'
+# from tit_train
+# group by Title
+
+tapply(tit_train$Sex, tit_train$Title, length) 
+# select Title, count(Sex) as cnt
+# from tit_train
+# group by Title
+
+by(tit_train,tit_train$Title,length)
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
