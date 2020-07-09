@@ -1,9 +1,9 @@
 ---
-title: "ML Courseara R Notebook"
+title: "ML Coursera R Notebook"
 output: html_notebook
 ---
 
-Terminology: Features(input vars), labels(output/target var), hypothesis, classification: prediction of discrete label values (if labels are strings, we encode them as numbers for ML), clustering: prediction of continuous numeric label values
+Terminology: Features(input vars), labels(output/target var), hypothesis, classification: prediction of discrete label values (if labels are strings, we encode them as numbers for ML), regression: prediction of continuous numeric label values, clustering: we find clusters/groupings in the data such that data in each cluster is cohesive in some sense.
 
 Traditional mathematical modeling starts with a equation and then tries to tune the parameters/coefficients
 of the model to best fit the observed data. In ML 'modelling' we just use the data to make
@@ -18,24 +18,29 @@ Linear equation for 3 features:
 H(x) = $θ_0 +θ_1*x_1 +θ_2*x_2 +θ_3*x_3$ 
 
 Now to do linear regression, we have the training data set which means we have values for features x1 to xN for different observations, the corresponding label values and we have to find the values of thetas. E.g.
-$θ_0 +θ_1*x_{1,1} +θ_2*x_{1,2}$ = 112
-$θ_0 +θ_1*x_{2,1} +θ_2*x_{2,2}$ = 201
+
+$θ_0 +θ_1*x_{1,1} +θ_2*x_{1,2}$ = 112 
+
+$θ_0 +θ_1*x_{2,1} +θ_2*x_{2,2}$ = 201 
+
 $θ_0 +θ_1*x_{3,1} +θ_2*x_{3,2}$ = 169
 
 Filling in the example feature values, it becomes:
+
 $θ_0 +θ_1*6 +θ_2*2$ = 112
+
 $θ_0 +θ_1*3 +θ_2*7$ = 201
+
 $θ_0 +θ_1*5 +θ_2*3$ = 169
 
 This system of linear equations can also be written as product of two matrices(we created a dummy feature with value 1 for all observations to be able to use matrix product):
-1 6 2   θ_0 = 112
-1 3 7 * θ_1 = 201
-1 5 3   θ_2 = 169
+![Mean Squared Error with 1 feature and m rows in training dataset.](./data/matrixForm.png){#id .class width=30% height=70%}
 
-Now what we have is a system of linear equations. Why do we need Linear regression to solve this and why can't we use linear equation solver for the answer?? I think a solution has to exist if we have to use linear equation solver to get the result. A solution will exist if these 3 planes(lines in case of 2 dimensions. Here we have 3 dimensions and thus we have a plane for each equation and solution exists if the 3 planes intersect) intersect at a point. If they do not intersect, no solution exists. In that case, linear regression will still up with the values of thetas/parameters/coefficients that minimize the loss
+Now what we have is a system of linear equations. Why do we need Linear regression to solve this and why can't we use linear equation solver for the answer?? I think a solution has to exist if we have to use linear equation solver to get the result. A solution will exist if these 3 planes(lines in case of 2 dimensions. Here we have 3 dimensions and thus we have a plane for each equation and solution exists if the 3 planes intersect) intersect at a point. If they do not intersect, no solution exists. In that case, linear regression will still come up with the values of thetas/parameters/coefficients that minimize the loss/cost/objective function for all the training dataset(RMSE??).
+
 
 ```{r}
-#Try to solve using 
+#Try to solve using linear eq. solver
 feature_matrix <- matrix(c(1,6,2,1,3,7,1,5,3),nrow=3,ncol=3,byrow = T)
 #parameter_vector is what we have to find
 label_vector = c(112,201,169)
@@ -66,6 +71,22 @@ lm_obj <- lm(label_vector~x1+x2,features_and_labels)#this give the same output a
 
 
 ```
+
+Squared error(SE) is calculated by taking the square of difference of prediction and the actual label value for every row in the training dataset and then summing it up. You can then take mean of it (dividing by number of rows in the training dataset) and then taking its root to get RMSE which scales down the value of SE.
+
+Cost Function:
+To measure the accuracy of the model we use a cost function.
+![Mean Squared Error with 1 feature and m rows in training dataset.](./data/se.png){#id .class width=250 height=70px} 
+In here we are taking the mean of SE and dividing it m. We also divide it by 2 to make the later math easier when we compute gradient descent as the 1/2 will cancel out the 2 from the derivative of squared error.
+
+By convention, the cost function is called J. Thus, for a univariate(one feature) dataset, the cost function would be the following where theta0 is the parameter/intercept term (or the coefficient of the dummy feature with value 1) and theta1 is the parameter/coefficient of the only feature variable in the dataset.  
+
+![Cost function for  1 feature training dataset.](./data/cost_func.png){#id .class width=7% height=70%}
+
+Now how do we minimize the cost function? Cost function is simply telling you how well the model performed, nothing else.
+We need some other smart logic to select the parameters/coefficients of the features such that the cost function is minimized. To visualize the problem, we can manually select different values of the theta parameters and then plot the cost. Now on that plot showing the cost function against the theta param values, we need to go in the direction where the cost is minimized. And that is what the smart parameter selection algos do, they go in the direction where cost is minimized. So we have to create a surface to visualize the parameter space and associated cost. 
+
+
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
 
