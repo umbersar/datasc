@@ -3,7 +3,7 @@ title: "ML Coursera R Notebook"
 output: html_notebook
 ---
 
-Terminology: Features(input vars), labels(output/target var), hypothesis, classification: prediction of discrete label values (if labels are strings, we encode them as numbers for ML), regression: prediction of continuous numeric label values, clustering: we find clusters/groupings in the data such that data in each cluster is cohesive in some sense.
+Terminology: prediction, Features(input vars), labels(output/target var), hypothesis function, objective/cost/loss function, optimization function, classification: prediction of discrete label values (if labels are strings, we encode them as numbers for ML), regression: prediction of continuous numeric label values, clustering: we find clusters/groupings in the data such that data in each cluster is cohesive in some sense.
 
 Traditional mathematical modeling starts with a equation and then tries to tune the parameters/coefficients
 of the model to best fit the observed data. In ML 'modelling' we just use the data to make
@@ -12,7 +12,9 @@ the parameters/coefficients so that the mathematical equation can be created to 
 
 Linear equation for one feature:
 y = f(x) = b + mx where b is intercept and m is slope. These are the tuning parameters/coefficients we have to predict. This equation can also be written in ML parlance as:
-H(x) = $θ_0 +θ_1*x$ where theta0 is intercept and theta1 is slope. And these parameters are what we have to find
+H(x) = $θ_0 +θ_1*x$ where theta0 is intercept and theta1 is slope. And these parameters are what we have to find. Note that the number of parameters is 1 + the number of actual features. The extra added parameter is the intercept(also called bias in ML lingo) which we multiply by 1(dummy feature added to the dataset to be able to multiply the feature matrix with parameter vector). 
+
+Note that this ML Bias(intercept parameter) is different from statistical bias(refer bias-variance tradeoff). Statistical bias refers to the error that the ML algo made predicting the labels over the input dataset. So the objective/cost functions SE/MSE/RMSE are actually measure Bias in statistical sense. One way to explain Bias-variance tradeoff is to try to fit a line to a input dataset. If the line is linear(hypothesis is linear), then it might underfit the data and hence we will get large bias(error). But if we try to fit a polynomial(of higher and higher order) to the data, then the error would keep decreasing but variance would increase as the polynomial would try to overfit data points (even the outliers) by varying wildly all over the problem space.
 
 Linear equation for 3 features:
 H(x) = $θ_0 +θ_1*x_1 +θ_2*x_2 +θ_3*x_3$ 
@@ -67,7 +69,7 @@ lm_obj <- lm(label_vector~x1+x2,features_and_labels)#this give the same output a
 #         782          -98          -41
 
 
-#TODO: Now come up with an example where the linea equation solver fails but linear regression succeeds.
+#TODO: Now come up with an example where the linear equation solver fails but linear regression succeeds. Lets take 2 parallel line and see what happens when we solve it using linear eq solver vs linear regression:
 
 
 ```
@@ -84,9 +86,15 @@ By convention, the cost function is called J. Thus, for a univariate(one feature
 ![Cost function for  1 feature training dataset.](./data/cost_func.png){#id .class width=7% height=70%}
 
 Now how do we minimize the cost function? Cost function is simply telling you how well the model performed, nothing else.
-We need some other smart logic to select the parameters/coefficients of the features such that the cost function is minimized. To visualize the problem, we can manually select different values of the theta parameters and then plot the cost. Now on that plot showing the cost function against the theta param values, we need to go in the direction where the cost is minimized. And that is what the smart parameter selection algos do, they go in the direction where cost is minimized. So we have to create a surface to visualize the parameter space and associated cost. 
+We need some other smart logic to select the parameters/coefficients of the features such that the cost function is minimized. To visualize the problem, we can manually select different values of the theta parameters and then plot the cost. Now on that plot showing the cost function against the theta param values, we need to go in the direction where the cost is minimized. And that is what the smart parameter selection algos do, they go in the direction where cost is minimized. To recap till here: for prediction you want to come with hypothesis function which has some parameters that work on the feature variables to fit the data. To determine how well the model fits the data for some parameters, we use a objective /loss/cost func. And optimization function is the smart/heuristic logic that selects the params which minimize the objective func.
 
 
+So we have to create a surface to visualize the parameter space and associated cost and set up the math to minimize the objective/loss function. Note that since in this example we have 2 parameters which we are minimizing, it means that we have a on feature dataset(the extra parameter is the intercept)
+![Cost function for  1 feature training dataset.](./data/grad_desc_viz.png){#id .class width=29% height=70%}
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+![Math for gradient descent.](./data/grad_desc_math.png){#id .class width=39% height=70%}
+The alpha in the equation above is the learning rate(or step size) and each of the partial derivative  gives us the rate of change(or slope) of the loss function wrt to that parameter. Term converge means that on further iterations, we are not able to minimize the solution further. 
+
+Note: How does the -ve sign tells the algo to descend. The intuition behind is this: Lets say we are at a particular point on the cost function surface corresponding to param values theta0 and theta1 and we want to change theta0 such that we decrease the cost. For that we calculate the partial derivative of the cost function wrt theta0 which will give us the slope of the function at the point (theta0,theta1). If the slope is +ve, it means we have to decrease the value of theta0 to go downhill and if the the slope is -ve, it means we have to increase the value of theta0 to go downhill(-ve will cancle the -ve slope value and thus we will increase theta0). We have to do this for theta1 as well by taking the partial derivative of cost function wrt theta1 also.
+![Math for gradient descent.](./data/grad_desc_intuition.png){#id .class width=39% height=70%}
 
