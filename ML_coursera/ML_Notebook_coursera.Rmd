@@ -3,7 +3,7 @@ title: "ML Coursera R Notebook"
 output: html_notebook
 ---
 
-Terminology/vocabulary: prediction, Features(input vars), labels(output/target var), hypothesis function, objective/cost/loss function, optimization function, classification: prediction of discrete label values (if labels are strings, we encode them as numbers for ML), regression: prediction of continuous numeric label values, clustering: we find clusters/groupings in the data such that data in each cluster is cohesive in some sense.
+Terminology/vocabulary: prediction, Features(input vars), labels(output/target var), hypothesis function, objective/cost/loss function, optimization function, classification: prediction of discrete label values (if labels are strings, we encode them as numbers for ML), regression: prediction of continuous numeric label values, clustering: we find clusters/groupings in the data such that data in each cluster is cohesive in some sense. m is the number of rows in training dataset and n is the number of features(theta is no. of params and is n+1)
 
 Traditional mathematical modeling starts with a equation and then tries to tune the parameters/coefficients
 of the model to best fit the observed data. In ML 'modelling' we just use the data to make
@@ -106,11 +106,44 @@ Now how do we calculate derivative to get the slope. In this case since there ar
 
 Since there are 2 variables in the cost/objective function, we take the partial derivative of cost function wrt to both(turn by turn varying one and keeping other constant) to give us the slope of cost func. [derivative is slope]
 ![Gradient descent step size overshoot or convergence](./data/partial_deriv_0.png){#id .class width=150% height=150%}
-This gives us the slope of the cost functions wrt to different parameters which we can now back plug into the gradient descent algo. This version of Gradient descent is also called Batch Gradient Descent as it takes the complete batch of training dataset(all the m rows)
-![Gradient descent algo convergence](./data/grad_desc_algo.png){#id .class width=30% height=40%}
+This gives us the slope of the cost functions wrt to different parameters which we can now back plug into the gradient descent algo. This version of Gradient descent is also called Batch Gradient Descent as it takes the complete batch of training dataset(all the m rows). Note that since we have added a dummy feature with value 1, we can generalize the two eq.s to be one parameterized such that we can loop over it(loop will run for the total number of thetas) with x0 being 1. This will also account for any number of features as well.
+![Gradient descent algo convergence](./data/grad_desc_algo.png){#id .class width=90% height=40%}
 
 Now how do we deal with the problem of gradient descent converging to local minimum (instead of the global minimum). Normally we would run the algo many times from different random starting points in the hope that it will descend to the global minimum. But for linear function we do not have to worry about gradient descent converging to a local minimum as the cost function for linear regression is convex and thus has only on minimum. So if we take a small learning rate/stepsize, gradient descent will eventually converge. TODO:Do not know why it is being called convex as the image conveys it is concave!
 ![Convex nature of cost function of linear regression](./data/convex_cost_linear_reg.png){#id .class width=30% height=40%}
 
-Note: above i had noted that the linear equations that do not have a solution cannot be solved using numerical methods. That is false. There exist numerical methods(normal equations method) that taken into account the cost function and thus can work towards achieving that goal instead of an explicit solution. For small datasets normal equations methods might be faster than gradient descent as gradient descent is iterative but gradient descent scales much better and for large datasets it is faster. TODO: Aren't numerical methods also iterative methods??
+Note: above i had noted that the linear equations that do not have a solution cannot be solved using numerical methods. That is false. There exist numerical methods(normal equations method) that taken into account the cost function and thus can work towards achieving that goal instead of an explicit solution. For small datasets normal equations methods might be faster than gradient descent as gradient descent is iterative but gradient descent scales much better and for large datasets it is faster. TODO: Aren't numerical methods also iterative methods?? Yes, but this Normal equation method is not iterative. It solves for theta in one step. Refer:https://mathworld.wolfram.com/NormalEquation.html. Also, to note that there is no need to do feature scaling in normal equations method(which we do for grad descent)
+![Convex nature of cost function of linear regression](./data/normal_equations.png){#id .class width=30% height=40%}
+
+Diff bw Hyperparameters and parameters: parameters are 'learned' by the ML algo whereas hyperparameters are those parameters which provided as input to the  ML algo. For example: the number of layers in a neural network or the step size(learning rate) in linear regression are hyperparameters. The hyperparamters can be tuned as well and  going through the hyperparameter search space looking for the ones that get the ML algo to perform better is computationally expensive.
+
+Matrix review: inverse(inverse does not exist either because the matrix is not square or it is close to 0[called singular or degenerate matrix in that case]),transpose,identity
+
+Feature scaling: If the values for different features have different ranges, then gradient descent might take a long time to converge(the countour plot for objective/cost func would be skinny and tall/wide). This is because θ will descend quickly on small ranges and slowly on large ranges, and so will oscillate inefficiently down to the optimum when the variables are very uneven.
+By scaling the features down to values in same range (for e.g between >=0 and <=1), we make the countour plot more circular and gradient descent can find minimum faster. 
+![feature scaling](./data/feature_scaling.png){#id .class width=40% height=40%}
+```{r}
+a <- c(-10:13)#values in a feature vector 
+#scaled value so that they are bw 0 and 1
+(-10-min(a))/(max(a)-min(a))
+(0-min(a))/(max(a)-min(a))
+(13-min(a))/(max(a)-min(a))
+#mean normalization(scaling) scales the values so that they are bw -.5 and .5(0 is the mean of the scaled range)
+(-10-mean(a))/(max(a)-min(a))
+(0-mean(a))/(max(a)-min(a))
+(13-mean(a))/(max(a)-min(a))
+
+```
+
+Feature creation and selection: you might need to reduce the features by looking at the correlations. You might also reduce features by creating new ones from existing features(for eg create feature 'area' from 'length' and 'width').  Fitting a polynomial(quadratic,cubic function) also involves feature creation as you create a new feature by taking the square/cube/etc. of a given feature.
+
+```{r}
+f<-function(theta){
+  1*(theta)^2 + 1*(theta) + 1
+}
+#plot(theta,f)
+plot.function(f,from = -5, to=5)
+nlm(f,p=8)
+
+```
 
