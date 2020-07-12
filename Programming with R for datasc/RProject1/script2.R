@@ -226,6 +226,9 @@ plot(c(0,1),c(-1,1.5))
 for (f in c(g1,g2,g3)) plot(f,0,1,add=T)  # add plot to existing graph
 
 ?nlm #gives you the function minimum. You can also plot the function to visually look the min
+#note that the way you get the minimum of a function is to set the derivative of the function to 0(the
+#point of 0 slope). If there are more than 1 vars in the func, take partial derivatives wrt them and 
+#set them to 0.
 func<-function(x) return(x^2-sin(x))
 nlm(func,8)#minimum value was found to be approximately −0.23, occurring at x = 0.45
 plot.function(func,from = -100,to = 100)
