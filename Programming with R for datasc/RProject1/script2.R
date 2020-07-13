@@ -246,7 +246,7 @@ wireframe(z ~ x+y, eg)
 wireframe(z ~ x+y, eg, shade=T)
 cloud(z ~ x+y, eg)
 
-#method 2. another way 3d plot it can be plotted. Without expand.grid with nested loops to fill in the grid
+#method 2. another way 3d surface plot it can be plotted. Without expand.grid with nested loops to fill in the grid
 # Grid over which we will calculate J
 theta0_vals <- seq(-10, 10, length.out=100)
 theta1_vals <- seq(-2, 4, length.out=100)
@@ -268,7 +268,7 @@ for (i in 1:length(theta0_vals)) {
 }
 wireframe(J_vals, drape=T, col.regions=rainbow(100))
 
-#method 3: 3d plot. does not use expand.grid or nested loop but uses outer to populate the grid
+#method 3: 3d surface plot. does not use expand.grid or nested loop but uses outer to populate the grid
 fdejong <- function (x, y) {
   return (x^2 + y^2)
 }
@@ -279,7 +279,7 @@ z[is.na(z)] <- 1
 require(lattice)
 wireframe(z, drape=T, col.regions=rainbow(100))
 
-#method 4: 3d plot that you can move around(interactive). 
+#method 4: 3d surface plot that you can move around(interactive). 
 # Grid over which we will calculate J
 theta0_vals <- seq(-10, 10, length.out=100)
 theta1_vals <- seq(-2, 4, length.out=100)
@@ -291,7 +291,7 @@ for (i in 1:length(theta0_vals)) {
     J_vals[i,j] <- J(X, y, c(theta0_vals[i], theta1_vals[j]))
   }
 }
-#interactive 3D plot
+#interactive 3D surface plot
 #install.packages("rgl")
 library(rgl) 
 open3d()
@@ -306,6 +306,29 @@ persp3d(theta0_vals, theta1_vals, J_vals,col = color[J_vals_col],
 points3d(theta_history[, 1], theta_history[, 2], J_history+10, 
          col="red",size=3.5)
 lines3d(theta_history[, 1], theta_history[, 2], J_history+10, col="red")
+
+#method 5: this is for a 3d interactive scatter plot(not surface)
+library(rgl)
+
+open3d()
+plot3d(X[,2],X[,3],y, 
+       xlab= "sq-ft of room", ylab="#bedroom", zlab="price", col="blue",  
+       type="s",size=1.5, main="Result of Gradient Descent")
+
+xx <- seq(0,5000,length.out=25)
+yy <- seq(1,5,length.out = 25)
+zz <- matrix(0,length(xx),length(yy))
+
+for (i in 1:length(xx))
+  for (j in 1:length(yy))
+    zz[i,j] <- cbind(1, (xx[i]-mu[1])/sigma[1],(yy[j]-mu[2])/sigma[2]) %*% theta
+
+#MATLAB Like plane
+nbcol = 100
+color = rev(rainbow(nbcol, start = 0/6, end = 4/6))
+zcol  = cut(zz, nbcol)
+persp3d(xx,yy,zz, add = TRUE, col=color[zcol],alpha=.6)
+
 
 
 matrix(c(5, 4, 3, 2, 1, 0) + 2, nrow = 2) < 5
