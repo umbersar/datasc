@@ -8,6 +8,7 @@
 #  in this exericse:
 #
 #     prediction.r
+#     pinv.R
 #     warmUpExercise.R
 #     plotData.R
 #     gradientDescent.R
@@ -26,8 +27,8 @@
 
 ## Initialization
 rm(list=ls())
-sources <- c("prediction.R","computeCost.R","gradientDescent.R",
-             "plotData.R","warmUpExercise.R")
+sources <- c("pinv.R","prediction.R","computeCost.R","gradientDescent.R",
+             "plotData.R","warmUpExercise.R","normalEqn.R")
 for (i in 1:length(sources)) {
   cat(paste("Loading ",sources[i],"\n"))
   source(sources[i])
@@ -83,6 +84,10 @@ theta <- gd$theta#-3.629812  1.166314
 j_history <- gd$j_history
 theta_history <- gd$theta_history
 rm(gd)
+
+#try to use normal equation method for finding theta and compare its result with gradient 
+#descent method. Nearly equal
+(normalEqn(X,y))#it returns -3.895781  1.193034
 
 # print theta to screen
 cat('Theta found by gradient descent: ')

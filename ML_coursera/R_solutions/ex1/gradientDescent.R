@@ -1,4 +1,5 @@
 gradientDescent <- function(X, y, theta, alpha, iterations) {
+  source("prediction.R")#includes the hypothesis function
   m = nrow(X)#length(y) or length(theta) would have been same
   
   #save theta history as well as cost history for that theta so that we can plot the route on a countour map

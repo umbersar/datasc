@@ -279,6 +279,33 @@ z[is.na(z)] <- 1
 require(lattice)
 wireframe(z, drape=T, col.regions=rainbow(100))
 
+#method 4: 3d plot that you can move around(interactive). 
+# Grid over which we will calculate J
+theta0_vals <- seq(-10, 10, length.out=100)
+theta1_vals <- seq(-2, 4, length.out=100)
+# initialize J_vals to a matrix of 0's
+J_vals <- matrix(0,length(theta0_vals), length(theta1_vals))
+# Fill out J_vals
+for (i in 1:length(theta0_vals)) {
+  for (j in 1:length(theta1_vals)) {
+    J_vals[i,j] <- J(X, y, c(theta0_vals[i], theta1_vals[j]))
+  }
+}
+#interactive 3D plot
+#install.packages("rgl")
+library(rgl) 
+open3d()
+
+nbcol = 100
+color = rev(rainbow(nbcol, start = 0/6, end = 4/6))
+J_vals_col  = cut(J_vals, nbcol)
+
+persp3d(theta0_vals, theta1_vals, J_vals,col = color[J_vals_col],
+        xlab=expression(theta_0),ylab=expression(theta_1),
+        zlab="Cost",main = "Gradient Descent")
+points3d(theta_history[, 1], theta_history[, 2], J_history+10, 
+         col="red",size=3.5)
+lines3d(theta_history[, 1], theta_history[, 2], J_history+10, col="red")
 
 
 matrix(c(5, 4, 3, 2, 1, 0) + 2, nrow = 2) < 5
