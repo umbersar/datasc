@@ -146,4 +146,44 @@ plot.function(f,from = -5, to=5)
 nlm(f,p=8)
 
 ```
+Assignment1 code:
+```{r}
+warmUpExercise <-function(){
+  diag(x=5)
+}
+
+#prediction
+H <- function(X,theta){
+  X%*%theta
+}
+
+#ComputeCost
+J <- function(X,y, theta){
+  m = nrow(X)#length(y) or length(theta) would have been same
+  (2*m)^-1 * sum((H - y)^2)
+}
+
+#alpha and iterations are hyperparameters
+gradientDescent <- function(theta,X,h,alpha,iterations){
+  m = nrow(X)#length(y) or length(theta) would have been same
+  
+  #save theta history as well as cost history for that theta so that we can plot the route on a countour map
+  j_history <- vector(mode="numeric", length=iterations+1)#j_history = rep(0,iterations)
+  theta_history <- matrix(data=0,nrow=iterations+1,ncol=length(theta))#initilize a matrix with 0's
+  
+  #store the initial cost and theta in history var
+  j_history[1] = J(X,y, theta)
+  theta_history[1] = theta
+    
+  for (i in (2:iterations+1)) {
+    slope = m^-1 * ((H-y) %*% X)#the derivation term
+    theta = theta - (1/alpha)*slope
+    
+    j_history[i] = J(X,y, theta)
+    theta_history[i] = theta
+  }
+  
+  list(theta, j_history, theta_history)#this will be returned
+}
+```
 

@@ -236,7 +236,7 @@ plot.function(func,from = -100,to = 100, n=100000)#n is the number of steps betw
 #Default is 101 steps i think. Increasing the n would make the plot smoother if it is wavy.
 dx2x <- deriv(~ x^2, "x") ; dx2x
 
-#you can also plot a 3d surface
+#Method1. you can also plot a 3d surface. Uses expand.grid
 library(lattice)
 a <- 1:10
 b <- 1:15
@@ -245,6 +245,39 @@ eg$z <- eg$x^2 + eg$x * eg$y
 wireframe(z ~ x+y, eg)
 wireframe(z ~ x+y, eg, shade=T)
 cloud(z ~ x+y, eg)
+
+#method 2. another way 3d plot it can be plotted. Without expand.grid with nested loops to fill in the grid
+# Grid over which we will calculate J
+theta0_vals <- seq(-10, 10, length.out=100)
+theta1_vals <- seq(-2, 4, length.out=100)
+
+# initialize J_vals to a matrix of 0's
+J_vals <- matrix(data=0,nrow=length(theta0_vals), ncol=length(theta1_vals))
+
+#this is the cost func
+J <- function(X, y, theta) {
+  m = nrow(X)#length(y) or length(theta) would have been same
+  (2*m)^-1 * sum((H(X,theta) - y)^2)
+}
+
+# Fill out J_vals
+for (i in 1:length(theta0_vals)) {
+  for (j in 1:length(theta1_vals)) {
+    J_vals[i,j] <- J(X, y, c(theta0_vals[i], theta1_vals[j]))
+  }
+}
+wireframe(J_vals, drape=T, col.regions=rainbow(100))
+
+#method 3: 3d plot. does not use expand.grid or nested loop but uses outer to populate the grid
+fdejong <- function (x, y) {
+  return (x^2 + y^2)
+}
+x <- seq(-10, 10, length= 30)
+y <- x
+z <- outer(x, y, fdejong)
+z[is.na(z)] <- 1
+require(lattice)
+wireframe(z, drape=T, col.regions=rainbow(100))
 
 
 
