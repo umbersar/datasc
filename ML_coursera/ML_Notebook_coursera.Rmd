@@ -109,7 +109,7 @@ Since there are 2 variables in the cost/objective function, we take the partial 
 This gives us the slope of the cost functions wrt to different parameters which we can now back plug into the gradient descent algo. This version of Gradient descent is also called Batch Gradient Descent as it takes the complete batch of training dataset(all the m rows). Note that since we have added a dummy feature with value 1, we can generalize the two eq.s to be one parameterized such that we can loop over it(loop will run for the total number of thetas) with x0 being 1. This will also account for any number of features as well.
 ![Gradient descent algo convergence](./data/grad_desc_algo.png){#id .class width=90% height=40%}
 
-Now how do we deal with the problem of gradient descent converging to local minimum (instead of the global minimum). Normally we would run the algo many times from different random starting points in the hope that it will descend to the global minimum. But for linear function we do not have to worry about gradient descent converging to a local minimum as the cost function for linear regression is convex and thus has only on minimum. So if we take a small learning rate/stepsize, gradient descent will eventually converge. TODO:Do not know why it is being called convex as the image conveys it is concave!
+Now how do we deal with the problem of gradient descent converging to local minimum (instead of the global minimum). Normally we would run the algo many times from different random starting points in the hope that it will descend to the global minimum. But for linear function we do not have to worry about gradient descent converging to a local minimum as the cost function for linear regression is convex and thus has only on minimum. So if we take a small learning rate/stepsize, gradient descent will eventually converge. TODO:Do not know why it is being called convex as the image conveys it is concave.! It is being called convex as it is convex downwards (and concave upwards)
 ![Convex nature of cost function of linear regression](./data/convex_cost_linear_reg.png){#id .class width=30% height=40%}
 
 Note: above i had noted that the linear equations that do not have a solution cannot be solved using numerical methods. That is false. There exist numerical methods(normal equations method) that taken into account the cost function and thus can work towards achieving that goal instead of an explicit solution. For small datasets normal equations methods might be faster than gradient descent as gradient descent is iterative but gradient descent scales much better and for large datasets it is faster. TODO: Aren't numerical methods also iterative methods?? Yes, but this Normal equation method is not iterative. It solves for theta in one step. Refer:https://mathworld.wolfram.com/NormalEquation.html. Also, to note that there is no need to do feature scaling in normal equations method(which we do for grad descent)
@@ -146,7 +146,7 @@ plot.function(f,from = -5, to=5)
 nlm(f,p=8)
 
 ```
-Assignment1 code:
+Assignment1 code: The important thing to note here is that the cost function/J(θ) is not used directly in the code anywhere but what is used is its' derivative/slope in the optimization algo gradient descent.
 ```{r}
 warmUpExercise <-function(){
   diag(x=5)
@@ -173,17 +173,78 @@ gradientDescent <- function(theta,X,h,alpha,iterations){
   
   #store the initial cost and theta in history var
   j_history[1] = J(X,y, theta)
-  theta_history[1] = theta
-    
+  theta_history[1,] = theta
+  
   for (i in (2:iterations+1)) {
-    slope = m^-1 * ((H-y) %*% X)#the derivation term
-    theta = theta - (1/alpha)*slope
+    slope = m^-1 * (t(X) %*% (H(X,theta)-y))#the derivation term
+    theta = theta - (alpha)*slope
     
     j_history[i] = J(X,y, theta)
-    theta_history[i] = theta
+    theta_history[i,] = theta
   }
   
-  list(theta, j_history, theta_history)#this will be returned
+  #theta_history[iterations+1] is the last theta at the end of iterations
+  list(theta = theta_history[iterations+1,], j_history=j_history, theta_history=theta_history)#this will be returned
+}
+
+normalEqn <- function(X, y) {
+  source("pinv.R")
+  theta <- rep(0,length(y))
+  
+  theta <- pinv(t(X)%*%X) %*% t(X) %*% y
+}
+
+featureNormalize <- function(X) {
+
+  X_norm <- X
+  mu <- rep(0,ncol(X))
+  sigma <- rep(0,ncol(X))
+  
+  mu = apply(X,2,mean)
+  sigma = apply(X,2,sd)
+  
+  # X_norm = apply(X, 2, meanNormalizeUsingSD)#no need to apply as we vectorize. see below 
+  (X-mu)/(sigma)#this is vectorized code. Thus no need for apply
+  
+  list(X_norm = X_norm, mu = mu, sigma = sigma)
+  # ------------------------------------------------------------
 }
 ```
 
+Logistic regression: Used for binary classification(label we are trying to predict has discrete values). Uses a logistic function to transform the predicted label values to be between 0 and 1. The predicted values are what we obtain by multiplying feature matrix(with the dummy feature) with theta/parameter vector: X %*% theta. Remember this was our hypothesis/h/prediction function for Linear Regressoin. For logistic regression, we take this as input to the logistic function to massage the prediction label to bw 0 and 1. Logistic func is a Sigmoid func(S shaped) and there are other Sigmoid funcs as well(tanh, arctan, etc.)
+
+![Logistic regression](./data/sigmoid_logistic_regression.png){#id .class width=30% height=40%} Note that small x is feature vector. Had it been Upper case, X, it would have been feature matrix and in  that case convention is that we have features in columns for an particular example/sample. Hence the prediction/hypothesis func in the case where there are more than 1 samples for whom we are trying to do the prediction, we do not need to transpose and simply do Xθ. Remember by convention a vector is a matrix of 1 column (and the number of rows in the vector give its dimensions)
+
+Since the output of the logistic func is bounded bw 0 and 1,  we take its output as predicted probability. Say if we predicting credit card fraud, then a value of .7 of h(x) suggests that there is 70% chance the transaction is fraudulent. (Note: θ'x can be a polynomial as well)
+θ'x≥0⇒y=1 (' is just transpose)
+θ'x<0⇒y=0
+![Logistic regression plot](./data/sigmoid_logistic_regression_plot.png){#id .class width=80% height=40%}
+Cost/objective function for logistic regression: We can't use the MSE (mean squared error) or its'  variants as the cost function because for logistic regression, MSE is a non-convex function. It has many local optima and hence, it might get stuck in a local minimum.
+![MSE as cost func for Logistic regression is non-convex](./data/MSE_cost_func_logistic_regression.png){#id .class width=60% height=40%}
+![Logistic regression cost](./data/log_cost_func_logistic_regression.png){#id .class width=80% height=40%}. Note that m is the number of samples/row in training dataset. Hence it still takes average of error, just that it is not squared error.
+
+Cost(hθ(x),y)=0 if hθ(x)=y
+Cost(hθ(x),y)→∞ if y=0 and hθ(x)→1
+Cost(hθ(x),y)→∞ if y=1 and hθ(x)→0
+Here is sample code showing costs for false positive and false negative probability spectrum:
+```{r}
+x <- seq(0.1,.9,by = .01)
+y <- -log(x) #log(1) is 0 and log(0) is -inf
+log(0);log(1)#log is a base 10 log. So log(1)=10^0 (and log(0) a very very small -ve number that
+#is raised to 10 results in number closer to 0)
+plot(x,y,xlab = "hypothesis prediction when actual label is 1(y=1)",ylab = "cost")
+
+
+x <- seq(0.1,.9,by = .01)
+y <- -log(1-x) 
+plot(x,y,xlab = "hypothesis prediction when actual label is 0(y=0)",ylab = "cost")
+
+```
+
+Now compress the 2 separate cost equations(for 2 different y values) into 1:
+cost(H(x), y) =  -y.log(h(x)) - (1-y).log(1-h(x))
+
+Now we have the hypothesis function and cost/objective function. Now what we want is a optimization function that is the smart/heuristic logic that selects the params which minimize the objective/cost func. Gradient descent is one optimization algo. If we plug in the new cost function for logistic regression and then take its' partial derivatives to find the slope(rate of change wrt theta parameters), we find that the derivative is a similar equation that we had calculated for linear regression cost function(MSE), the difference being the h func. 
+![Logistic regression cost](./data/grad_desc_algo_logistic_regres.png){#id .class width=80% height=40%}
+Although we have already vectorized the code in grad. desc. algo that we wrote for linear regression, and the following is the same, but just ponder over it and think how the summation operation was taken care of by the matrix dot product. The subtract operation was vectorized as in R/octave you can subtract vectors from vectors without needing to iterate through them. Note that m here is the number of rows in training dataset and j here is the iterator over number of features(n+1 including dummy feature).
+![Logistic regression cost](./data/iteration_vs_vectorization.png){#id .class width=50% height=40%}
