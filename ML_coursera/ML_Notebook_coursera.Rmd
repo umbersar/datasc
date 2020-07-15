@@ -96,7 +96,7 @@ So we have to create a surface to visualize the parameter space and associated c
 ![Cost function for  1 feature training dataset.](./data/grad_desc_viz.png){#id .class width=29% height=70%}
 
 ![Math for gradient descent.](./data/grad_desc_math.png){#id .class width=39% height=70%}
-The alpha in the equation above is the learning rate(or step size) and each of the partial derivative  gives us the rate of change(or slope) of the loss function wrt to that parameter (in that direction). Term converge means that on further iterations, we are not able to minimize the solution further. 
+The alpha in the equation above is the learning rate(or step size) and each of the partial derivative  gives us the rate of change(or slope/gradient) of the loss function wrt to that parameter (in that direction). Term converge means that on further iterations, we are not able to minimize the solution further. A function would be at its minimum (converged) when the slope/gradient/partial derivatives wrt thetas/params is 0. We can also define tolerance for the optimization algo. If the slope/partial derivatives wrt thetas/gradient is very near to 0, thus making very small changes in thetas (those very small changes<tolerance), we can say that solution has converged.  
 
 Note: How does the -ve sign tells the algo to descend. The intuition behind is this: Lets say we are at a particular point on the cost function surface corresponding to param values theta0 and theta1 and we want to change theta0 such that we decrease the cost. For that we calculate the partial derivative of the cost function wrt theta0 which will give us the slope of the function at the point (theta0,theta1). If the slope is +ve, it means we have to decrease the value of theta0 to go downhill and if the the slope is -ve, it means we have to increase the value of theta0 to go downhill(-ve will cancle the -ve slope value and thus we will increase theta0). We have to do this for theta1 as well by taking the partial derivative of cost function wrt theta1 also.
 ![Math for gradient descent.](./data/grad_desc_intuition.png){#id .class width=39% height=70%}
@@ -120,7 +120,7 @@ Note: above i had noted that the linear equations that do not have a solution ca
 
 Diff bw Hyperparameters and parameters: parameters are 'learned' by the ML algo whereas hyperparameters are those parameters which provided as input to the  ML algo. For example: the number of layers in a neural network or the step size(learning rate) in linear regression are hyperparameters. The hyperparamters can be tuned as well and  going through the hyperparameter search space looking for the ones that get the ML algo to perform better is computationally expensive.
 
-Matrix review: inverse(inverse does not exist either because the matrix is not square or it is close to 0[called singular or degenerate matrix in that case]),transpose,identity
+Matrix review: inverse(inverse does not exist either because the matrix is not square or its determinant is 0[called singular or degenerate matrix in that case]),transpose,identity
 
 Feature scaling: If the values for different features have different ranges, then gradient descent might take a long time to converge(the countour plot for objective/cost func would be skinny and tall/wide). This is because θ will descend quickly on small ranges and slowly on large ranges, and so will oscillate inefficiently down to the optimum when the variables are very uneven.
 By scaling the features down to values in same range (for e.g between >=0 and <=1), we make the countour plot more circular and gradient descent can find minimum faster. 
@@ -149,7 +149,7 @@ plot.function(f,from = -5, to=5)
 nlm(f,p=8)
 
 ```
-Assignment1 code: The important thing to note here is that the cost function/J(θ) is not used directly in the code anywhere but what is used is its' derivative/slope in the optimization algo gradient descent.
+Assignment1 code: The important thing to note here is that the cost function/J(θ) is not used directly in the code anywhere but what is used is its derivative/slope in the optimization algo gradient descent.
 ```{r}
 warmUpExercise <-function(){
   diag(x=5)
@@ -222,7 +222,7 @@ Since the output of the logistic func is bounded bw 0 and 1,  we take its output
 θ'x≥0⇒y=1 (' is just transpose)
 θ'x<0⇒y=0
 ![Logistic regression plot](./data/sigmoid_logistic_regression_plot.png){#id .class width=80% height=40%}
-Cost/objective function for logistic regression: We can't use the MSE (mean squared error) or its'  variants as the cost function because for logistic regression, MSE is a non-convex function. It has many local optima and hence, it might get stuck in a local minimum.
+Cost/objective function for logistic regression: We can't use the MSE (mean squared error) or its  variants as the cost function because for logistic regression, MSE is a non-convex function. It has many local optima and hence, it might get stuck in a local minimum.
 ![MSE as cost func for Logistic regression is non-convex](./data/MSE_cost_func_logistic_regression.png){#id .class width=60% height=40%}
 ![Logistic regression cost](./data/log_cost_func_logistic_regression.png){#id .class width=80% height=40%}. Note that m is the number of samples/row in training dataset. Hence it still takes average of error, just that it is not squared error.
 
@@ -247,22 +247,33 @@ plot(x,y,xlab = "hypothesis prediction when actual label is 0(y=0)",ylab = "cost
 Now compress the 2 separate cost equations(for 2 different y values) into 1:
 cost(H(x), y) =  -y.log(h(x)) - (1-y).log(1-h(x))
 
-Now we have the hypothesis function and cost/objective function. Now what we want is a optimization function that is the smart/heuristic logic that selects the params which minimize the objective/cost func. Gradient descent is one optimization algo. If we plug in the new cost function for logistic regression and then take its' partial derivatives to find the slope(rate of change wrt theta parameters), we find that the derivative is a similar equation that we had calculated for linear regression cost function(MSE), the difference being the h func. 
+Now we have the hypothesis function and cost/objective function. Now what we want is a optimization function that is the smart/heuristic logic that selects the params which minimize the objective/cost func. Gradient descent is one optimization algo. If we plug in the new cost function for logistic regression and then take its partial derivatives to find the slope(rate of change wrt theta parameters), we find that the derivative is a similar equation that we had calculated for linear regression cost function(MSE), the difference being the h func. 
 ![Logistic regression cost](./data/grad_desc_algo_logistic_regres.png){#id .class width=80% height=40%}
 Although we have already vectorized the code in grad. desc. algo that we wrote for linear regression, and the following is the same, but just ponder over it and think how the summation operation was taken care of by the matrix dot product. The subtract operation was vectorized as in R/octave you can subtract vectors from vectors without needing to iterate through them. Note that m here is the number of rows in training dataset and j here is the iterator over number of features(n+1 including dummy feature).
 ![Iteration vs vectorization](./data/iteration_vs_vectorization.png){#id .class width=50% height=40%}
 Regularization(shrinkage): When we shrink the theta(parameters) towards zero, then that is called regularization. Regularization(shrinkage) is used to reduce variance/overfitting. Depending on type of regularization used, some of the theta/params might become exactly 0 and hence regularization can also be used for feature selection/dimension reduction(the other methods for feature selection/dimension reduction being using correlation data).
 
-Intuition behind regularization is that we have to penalize high values of theta/params. For that, we add the theta params that we want to minimize(TODO: don't we do regularization for all params?? Yes, regularization is done for all theta/params. By convention we leave out theta0 from regularization) to the cost func multiplied with a big number. So the cost becomes high based on those params. Thus the optimization func will try to reduce those params towards 0. We add the square of thetas(by convention we do not regularize theta0. that is why the loop is running from j=1 to n. But we can regularize theta0 also if we want to) and not thetas because MSE has a squared term. So theta^2 brings it on same scale. 
+Intuition behind regularization is that we have to penalize high values of theta/params. For that, we add the theta params that we want to minimize(TODO: don't we do regularization for all params?? Yes, regularization is done for all theta/params. By convention we leave out theta0 from regularization) to the cost func multiplied with a big number. So the cost becomes high based on those params. Thus the optimization func will try to reduce those params towards 0. 
 
-As a side note, remember that cost function J(θ) is not used directly in optimization algo but its' derivative is used.
+Note:TODO: Why did we add square of thetas?? We add the square of thetas(by convention we do not regularize theta0. that is why the loop is running from j=1 to n. But we can regularize theta0 also if we want to) and not thetas because MSE has a squared term. So theta^2 brings it on same scale. Or, it could be that we add square of thetas just to inflate their cost/increase their penalty such that the optimization function can minimize them more efficiently.
+
+As a side note, remember that cost function J(θ) is not used directly in optimization algo but its derivative is used.
 ![Regularization cost func](./data/regularization_cost_func_intuition.png){#id .class width=70% height=40%}
 
 But if we use too large a number(regularization parameter λ), then it will make the model underfit the data. We can also say the model displays high bias(stats bias) 
 ![Very big regularization parameter](./data/Big_regularization_param_underfit.png){#id .class width=45% height=40%}
 
+Fit regularization to Linear regression: Remember to add the penalty on high values of θ to MSE cost func cost function J(θ). The derivative of this cost func is going to be used in Gradient descent. If you look at the new worked out equation of grad. desc., it shows that it is similar to unregularized grad. desc. except the term (1 – α(λ/m)) which would be less than 1 and hence would reduce the θ value on every iteration. Note that we have not regularized/penalized the theta0. Also note that the second equation here(for all theta other than theta0) can be vectorized by excluding the first element from the vectors(for e.g. theta[-] is the theta vector excluding the first element). So in effect we have 2 statements that we have to execute for solution and not iterate through.
 
+![Regularized Linear Regression Gradient Descent](./data/regularized_grad_desc.png){#id .class width=45% height=40%}
+Note: you can regularize Normal equations method as well. Refer https://bit.ly/3gX6A6g 
 
+Regularized Logistic Regression: Add the penalized theta/params to cost func J(θ). The derivative of this cost func is going to be used in the optimization algo for Logistic Regression, i.e. Gradient descent. We will again, by convention, not regularize/penalize theta0(ML bias/intercept...not stats bias) and only regularize/penalize the other thetas by by adding their inflating their magnitude and adding it to cost func. 
 
+TODO: Why did we add square of theta/params to the cost func?? Since penalty/cost is being controlled by the large number(regularization parameter λ), what effect does squaring achieve??
+![Regularized Logistic Regression Cost func and updated gradient descent algo](./data/regularized_logistic_regression_costfunc.png){#id .class width=80% height=40%}
+Advanced optimization for Linear and Logistic regression(both regularized and unregularized): Gradient descent is fine but there exists variants of it like BFGS, L-BFGS, etc. that are more smart in minimizing the cost func J(θ). In R you can use optim() to call these gradient descent variants. As arguments to optim, I think you have to pass the cost func and the partial derivative funcs wrt thetas/params and it will call those optimization algos for you. For regularized version of, say BFGS, you have to pass in the cost func J(θ) with the penalized thetas(except theta0) and the corresponding partial derivatives. In octave/Matlab, you can call fminunc() to call these advanced optimization methods. fminunc stands for function_minimum_unconstrained. Remember that for a function to be at its minimum, its slope/partial derivatives/gradients should be 0 (or near zero) for a given set of thetas. that set of thetas define the function minimum.
+
+Note: You can use polynomial features in Logistic regression to do non-linear classification but there exists more powerful class of non-linear classifiers than logistic regression. Also,  think about it that you can use polynomial features in Linear regression as well that sort of makes the term "Linear Regression" misnomer(poly)!
 
 
