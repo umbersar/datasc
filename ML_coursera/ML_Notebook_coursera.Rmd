@@ -277,3 +277,5 @@ Advanced optimization for Linear and Logistic regression(both regularized and un
 Note: You can use polynomial features in Logistic regression to do non-linear classification but there exists more powerful class of non-linear classifiers than logistic regression. Also,  think about it that you can use polynomial features in Linear regression as well that sort of makes the term "Linear Regression" misnomer(poly)!
 
 
+
+
