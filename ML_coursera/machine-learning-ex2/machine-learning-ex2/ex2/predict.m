@@ -17,7 +17,9 @@ p = zeros(m, 1);
 
 prediction_before_logistic_transformation = X*theta
 logistic_regression_hypothesis = sigmoid(prediction_before_logistic_transformation)
-ifelse(logistic_regression_hypothesis>=.5, 1, 0)
+
+p =ifelse(logistic_regression_hypothesis>=.5, 1, 0)
+#p = round(sigmoid(X*theta));
 
 % =========================================================================
 
