@@ -276,6 +276,64 @@ Advanced optimization for Linear and Logistic regression(both regularized and un
 
 Note: You can use polynomial features in Logistic regression to do non-linear classification but there exists more powerful class of non-linear classifiers than logistic regression. Also,  think about it that you can use polynomial features in Linear regression as well that sort of makes the term "Linear Regression" misnomer(poly)!
 
+Assignment2 code logistic regression and regularization: The important thing to note here is that the cost function/J(θ) is not used directly in the code anywhere but what is used is its derivative/slope in the optimization algo gradient descent. 
+```{r}
+#this is our hypothesis
+H <- function(x) {
+  1/(1 + exp(-x))
+}
+
+predict <- function(theta, X){
+  #returns 0 or 1 using learned logistic regression
+  prediction_before_logistic_transformation <- X%*%theta
+  
+  #call the sigmoid hypothesis func
+  logistic_regression_hypothesis_val = h(prediction_before_logistic_transformation)
+  #.5 is the threshold
+  ifelse(logistic_regression_hypothesis_val>=.5, 1, 0)
+}
+
+#cost func
+J  <- function(X, y, theta) {
+  m = nrow(X)#number of rows in training dataset
+  #(2*m)^-1 * sum((H - y)^2)#for reference, this was MSE cost func for Linear regression
+  
+  cost <- -1*( (1/m) * ( t(y) %*% log(H(X %*% theta)) + t(1-y) %*% log(1-H(X %*% theta)) ) )
+}
+
+#The gradient/slope of the cost func w.r.t. to the parameters thetas. Our own coded gradient descent algo would not need a separate function which returns gradients. It is used in optim() to perform advanced optimizations like BFGS, L-BFGS, etc. For this assignment, we did not code our own gradient descent
+grad <- function(X, y, theta) {
+  grad <-  m^-1 * (t(X) %*% (H(X %*% theta)-y))
+  grad
+}
+
+#regularized versions of J and gradient function(gradient function is used by optim to perform BFGS. If we had written our own gradient descent for Logistic regression, we would not need it)
+J_regulalized  <- function(X, y, theta, lambda) {
+  m = nrow(X)#number of rows in training dataset
+  #(2*m)^-1 * sum((H - y)^2)#just for reference this was MSE cost func for Linear regression
+  
+  #regularized cost func with added penalty on thetas (except theta0)
+  cost <- -1*( (1/m) * ( t(y) %*% log(H(X %*% theta)) + t(1-y) %*% log(1-H(X %*% theta)) ) ) + 
+          (lambda/(2*m)) * sum(theta[-1]^2)
+  cost
+}
+
+#The gradient/slope of the cost func w.r.t. to the parameters thetas.
+grad_regulalized <- function(X, y, theta, lambda) {
+  #For regularized logistic regression, we have to separate the vectorized slope/gradient 
+  #equation into 2 as we only add the penalty to thetas/params other than theta0
+  m = nrow(X)#number of rows in training dataset
+  
+  #a vector to hold values of slopes/gradients for all thetas/params
+  grad = vector(mode = "numeric", length = length(theta))#could also use rep(0,length(theta))
+  
+  grad[1] = (1/m)* t(X[,1]) %*% (H(X %*% theta) - y)
+  grad[-1] = (1/m)*  t(X[,-1]) %*% (H(X %*% theta) - y) + (lambda/m)*theta[-1]
+  grad
+}
+
+
+```
 
 
 
