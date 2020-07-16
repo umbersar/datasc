@@ -276,7 +276,7 @@ Advanced optimization for Linear and Logistic regression(both regularized and un
 
 Note: You can use polynomial features in Logistic regression to do non-linear classification but there exists more powerful class of non-linear classifiers than logistic regression. Also,  think about it that you can use polynomial features in Linear regression as well that sort of makes the term "Linear Regression" misnomer(poly)!
 
-Assignment2 code logistic regression and regularization: The important thing to note here is that the cost function/J(θ) is not used directly in the code anywhere but what is used is its derivative/slope in the optimization algo gradient descent. 
+Assignment2 code logistic regression and regularization: The important thing to note here is that the cost function/J(θ) is not used directly in the code anywhere but what is used is its derivative/slope in the optimization algo gradient descent. To remind ourselves of the goal, we are going to find best theta/parameters which minimizes the logistic regression cost function(in other words the decision boundary is defined by those thetas/params). X%*%theta was our H for Linear regression whereas now it is an input to the H (Logistic/sigmoid func) for logistic regression.
 ```{r}
 #this is our hypothesis
 H <- function(x) {
