@@ -3,7 +3,9 @@ title: "ML Coursera R Notebook"
 output: html_notebook
 ---
 
-Terminology/vocabulary: prediction, Features(input vars), labels(output/target var), hypothesis function, objective/cost/loss function, optimization function, classification: prediction of discrete label values (if labels are strings, we encode them as numbers for ML), regression: prediction of continuous numeric label values, clustering: we find clusters/groupings in the data such that data in each cluster is cohesive in some sense. m is the number of rows in training dataset and n is the number of features(theta is no. of params and is n+1), regularization(shrinkage, penalty)
+Terminology/vocabulary: prediction, Features(input vars), labels(output/target var), hypothesis function, objective/cost/loss function, optimization function, classification: prediction of discrete label values (if labels are strings, we encode them as numbers for ML), regression: prediction of continuous numeric label values, clustering: we find clusters/groupings in the data such that data in each cluster is cohesive in some sense. m is the number of rows in training dataset and n is the number of features(theta is no. of params and is n+1), curse of dimensionality(in terms of sparsity and closeness)->if we do not increase no. of rows-m in the training dataset for every added feature->sparse feature space and even the existing data points further and further apart->leads to overfitting as there is not enough data from which the ML algo can learn->overfitting can be handled with regularization), regularization(shrinkage, penalty)
+
+small case is vector(matrix with 1 column. So u r drawing a vector downwards) and upper case is matrix. So θ'x (x is a vector) and Xθ are both fine. Xθ is used in coding as the feature matrix is arranged such that each example is in a separate row. The main thing is that features and thetas have to be multiplied. So work it out depending on their shape.
 
 Traditional mathematical modeling starts with a equation and then tries to tune the parameters/coefficients
 of the model to best fit the observed data. In ML 'modelling' we just use the data to make
@@ -334,6 +336,18 @@ grad_regulalized <- function(X, y, theta, lambda) {
 
 
 ```
+
+
+Neural networks(NN): why do we need yet another ML technique? Because NN can handle a large number of features(large n) and work well for non-linear problems. Large no. of features can occur in commonly in source training dataset. If the problem is non-linear, we would have to create artificial polynomial features based on original ones. If the number of original features is large, the no. of polynomial terms(quadratic, cubic, etc.) added would be very very large. 
+And leads to the problem what is called the curse of dimensionality. Your feature space becomes very sparse for every added feature(not enough data to fill in the space as volume increases) and even existing data points become further and further apart. It becomes very hard for ML algo to understand the relationship between features without enough data. To fill in the feature space, you would have to add more rows to the training dataset. A sparse training dataset with not enough points can lead to overfitting. We can deal with overfitting with regularization though. But still, NN can scale much better.
+![Curse of dimensionality](./data/curse_of_dimensionality.png){#id .class width=80% height=40%}
+![Sigmoid/Logistic Hypothesis func and a single neuron](./data/sigmoid_or_logistic.png){#id .class width=60% height=40%} NN uses sigmoid/logistic function as the hypothesis function/activation function. InNN, the hypothesis function is called activation func, theta is weights (params/coefficients) and the dummy feature x0 is always 1(dummy feature is called bias unit, i.e. the unit of the bias aka intercept aka theta0) and thus can be omitted as well, features become the input layer, the final layer is called the output layer(it could have one neuron or multiple neurons) and layers in between are hidden layers . NN combines these single neurons in layers. TODO: is the activation/sigmoid hypothesis func used in hidden layers as well??
+
+![Sigmoid/Logistic Hypothesis func and a single neuron](./data/NN_layers.png){#id .class width=80% height=40%} Note that there are weights for each layer. So not only does the first layer (input layer of features) has weights/params, as is expected, but the output of intermediate/hidden layers are also multiplied with weights/params before being fed into next layer neurons. Dummy neurons are also added in hidden layers(with activation value 1) to accommodate the theta0(bias/intercept) for that layer. There exists separate instances of weight matrices for each adjoining pair of layers. The dimensions of weight matrix from layer j to layer j+1 is given by [length(j+1),length(j)+1]. So weight matrix for layer 1(feature layer) to layer 2(hidden layer) is [3,4]. Note that output nodes will not include the bias nodes(dummy feature) while the inputs will.
+  
+
+
+
 
 
 
