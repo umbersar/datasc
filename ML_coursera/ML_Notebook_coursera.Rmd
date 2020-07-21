@@ -3,7 +3,7 @@ title: "ML Coursera R Notebook"
 output: html_notebook
 ---
 
-Terminology/vocabulary: prediction, Features(input vars), labels(output/target var), hypothesis function, objective/cost/loss function, optimization function, classification: prediction of discrete label values (if labels are strings, we encode them as numbers for ML), regression: prediction of continuous numeric label values, clustering: we find clusters/groupings in the data such that data in each cluster is cohesive in some sense. m is the number of rows in training dataset and n is the number of features(theta is no. of params and is n+1), curse of dimensionality(in terms of sparsity and closeness)->if we do not increase no. of rows-m in the training dataset for every added feature->sparse feature space and even the existing data points further and further apart->leads to overfitting as there is not enough data from which the ML algo can learn->overfitting can be handled with regularization), regularization(shrinkage, penalty), non-linearity in a model in induced by adding higher order/polynomial features(else everything remains same),
+Terminology/vocabulary: prediction, Features(input vars), labels(output/target var), hypothesis function, objective/cost/loss function, optimization function, classification: prediction of discrete label values (if labels are strings, we encode them as numbers for ML), regression: prediction of continuous numeric label values, clustering: we find clusters/groupings in the data such that data in each cluster is cohesive in some sense. m is the number of rows in training dataset and n is the number of features(theta is no. of params and is n+1), curse of dimensionality(in terms of sparsity and closeness)->if we do not increase no. of rows-m in the training dataset for every added feature->sparse feature space and even the existing data points further and further apart->leads to overfitting as there is not enough data from which the ML algo can learn->overfitting can be handled with regularization), regularization(shrinkage, penalty), non-linearity in a model in induced by adding higher order/polynomial features(else everything remains same), intuition
 
 small case is vector(matrix with 1 column. So u r drawing a vector downwards) and upper case is matrix. So θ'x (x is a vector) and Xθ are both fine. Xθ is used in coding as the feature matrix is arranged such that each example is in a separate row. The main thing is that features and thetas have to be multiplied. So work it out depending on their shape.
 
@@ -343,7 +343,7 @@ And leads to the problem what is called the curse of dimensionality. Your featur
 ![Curse of dimensionality](./data/curse_of_dimensionality.png){#id .class width=80% height=40%}
 ![Sigmoid/Logistic Hypothesis func and a single neuron](./data/sigmoid_or_logistic.png){#id .class width=60% height=40%} NN uses sigmoid/logistic function as the hypothesis function/activation function. In NN, the hypothesis function is called activation func, theta is weights (params/coefficients) and the dummy feature x0 is always 1(dummy feature is called bias unit, i.e. the unit of the bias aka intercept aka theta0 and exists for hidden and output layers as well) and thus can be omitted as well, features become the input layer, the final layer is called the output layer(it could have one neuron or multiple neurons) and layers in between are hidden layers . NN combines these single neurons in layers. TODO: is the activation/sigmoid hypothesis func used in hidden layers as well?? yes, by convention we refer to their output values as activation values(in realty they are also hypothesis values for those specific neurons) and the activation value of the output layer is the hypothesis for the neural network. The hidden neurons can also be though of as complex features constructed from the input features(the input feature and corresponding weights are multiplied and the result is fed into sigmoid func to get the new contructed feature value).
 
-![Sigmoid/Logistic Hypothesis func and a single neuron](./data/NN_layers.png){#id .class width=80% height=40%} Note that there are weights for each layer. So not only does the first layer (input layer of features) has weights/params, as is expected, but the output of intermediate/hidden layers are also multiplied with weights/params before being fed into next layer neurons. Dummy neurons are also added in hidden layers(with activation value 1) to accommodate the theta0(bias/intercept) for that layer. There exists separate instances of weight matrices for each adjoining pair of layers. The dimensions of weight matrix from layer j to layer j+1 is given by [length(j+1),length(j)+1]. So weight matrix for layer 1(feature layer) to layer 2(hidden layer) is [3,4]. Other way to think about it is that we use a different set of thetas/weights/coefficients to be multiplied with the features for each output neuron(output feature) in the next layer. 
+![Sigmoid/Logistic Hypothesis func and a single neuron](./data/NN_layers.png){#id .class width=80% height=40%} Note that there are weights for each layer. So not only does the first layer (input layer of features) has weights/params, as is expected, but the output of intermediate/hidden layers are also multiplied with weights/params before being fed into next layer neurons. Dummy neurons are also added in hidden layers(with activation value 1) to accommodate the theta0(bias/intercept) for that layer. There exists separate instances of weight matrices for each adjoining pair of layers. The dimensions of weight matrix from layer j to layer j+1 is given by [length(j+1),length(j)+1]. So weight matrix for layer 1(feature layer) to layer 2(hidden layer) is [3,4]. Other way to think about it is that we use a different set of thetas/weights/coefficients to be multiplied with the features for each output neuron(output feature) in the next layer. In other words, the number of columns in our current theta matrix is equal to the number of nodes in our current layer (including the bias unit). The number of rows in our current theta matrix is equal to the number of nodes in the next layer (excluding the bias unit). 
 Note that output nodes will not include the bias nodes(dummy feature) while the inputs will. That makes sense as we do not want to compute the dummy feature value(the activation value for a0 neuron in hidden layers) for next layer. 
 
 ![Forward propagation NN](./data/NN_forward_propagation.png){#id .class width=60% height=40%} This is called forward propagation as the activations are propagated forward starting from the input layer, then the hidden and then the output layer.
@@ -355,4 +355,160 @@ Multi class classification with NN: The number of output neurons you will have w
 
 ![Multi class NN](./data/multi_class_nn.png){#id .class width=50% height=40%} The label/y that we feed into NN for training takes the form of a 4 dim vector with binary value set in it denoting the class to which that training sample/row belonged.
 
+Logistic(regularized) multi-class classification and NN prediction(pre-trained theta/params) assignment code:
 
+```{r}
+#the argument list would have been function(X, y, theta, lambda)
+#but since we are going to use optim to find the theta/params (by minimizing the cost), we need
+#to make a closure of this func on arguments except theta/params
+J_regulalized_for_optim <- function(X, y, lambda) {
+  #lrCostFunction Compute cost for logistic regression with
+  #regularization
+  
+  function(theta) {
+    m = nrow(X)#number of rows in training dataset
+    #(2*m)^-1 * sum((H - y)^2)#just for reference this was MSE cost func for Linear regression
+    
+    #regularized cost func with added penalty on thetas (except theta0)
+    cost <- -1*( (1/m) * ( t(y) %*% log(H(X %*% theta)) + t(1-y) %*% log(1-H(X %*% theta)) ) )
+    + (lambda/(2*m)) * sum(theta[-1]^2)
+    cost
+  }
+}
+
+grad_regulalized_for_optim <- function(X, y, lambda) {
+  function(theta) {
+    #For regularized logistic regression, we have to separate the vectorized slope/gradient 
+    #equation into 2 as we only add the penalty to thetas/params other than theta0
+    m = nrow(X)#number of rows in training dataset
+    
+    #a vector to hold values of slopes/gradients for all thetas/params
+    grad = vector(mode = "numeric", length = length(theta))#could also use rep(0,length(theta))
+    
+    grad[1] = (1/m)* t(X[,1]) %*% (H(X %*% theta) - y)
+    grad[-1] = (1/m)*  t(X[,-1]) %*% (H(X %*% theta) - y) + (lambda/m)*theta[-1]
+    grad    
+    
+  }
+}
+
+#use of optim func for optimization for logistic regression multi-class classification
+oneVsAll <- function(X, y, num_labels, lambda) {
+  #   all_theta <- ONEVSALL(X, y, num_labels, lambda) trains num_labels
+  #   logisitc regression classifiers and returns each of these classifiers
+  #   in a matrix all_theta, where the i-th row of all_theta corresponds
+  #   to the classifier for label i
+  
+  # Some useful variables
+  m <- nrow(X)
+  n <- ncol(X)
+  
+  #this will contain the theta/params for each of the oneVSall classifiers. Other way to put it is
+  #that each row of the theta matrix will contain the theta for predicting a label
+  all_theta <- matrix(0, nrow = num_labels, ncol = n + 1)
+  
+  # add the dummy feature to X data matrix
+  X <- cbind(rep(1,m),X)
+  
+
+  #To train oneVsall classifier, we run the optimization for each of the labels. And for each label,
+  #we set the training label to 0 for other labels(so it becomes a binary classification wrt that label)
+  #in the training label vector
+  #note here that the the number 1 is represented by 1 in training label,....till 9 and then 10 
+  #represents(or is the label of) digit 0
+  for (i in 1:num_labels) {
+    # Set Initial theta
+    initial_theta <- rep(0,n + 1)
+    
+    # Run optim to obtain the optimal theta. This function will return theta and the cost
+    opt <- optim(par = initial_theta, fn = J_regulalized_for_optim(X,y == i,lambda),
+      gr = grad_regulalized_for_optim(X,y == i,lambda),method = "BFGS"
+      ,control = list(maxit = 50))
+    
+    theta <- opt$par
+    J <- opt$value# we don't have any use for cost here but still
+    cat(sprintf("Iteration %d | Min Cost: %f\n",i,opt$value))
+    
+    all_theta[i,] <- theta
+  }
+  
+  all_theta
+}
+
+#logistic regression prediction for multi-class classification
+predictOneVsAll  <- function(all_theta, X) {
+  #   p <- PREDICT(all_theta, X) computes the predictions for X using a
+  #   threshold at 0.5 (i.e., if sigmoid(t(all_theta) %*% x) >= 0.5, predict 1)
+  
+  m <- nrow(X)#X contains the unlabeled data for which we have to predict.
+  num_labels <- nrow(all_theta)#all_theta has the thetas/params for all the oneVSall classifiers
+  
+  # You need to return the following variables correctly
+  p <- rep(0,nrow(X))#p is the prediction vector of length of m and has the prediction 
+  #for every row in the unlabeled data. 
+  
+  # add the dummy feature to the matrix of features(X...unlabeled data)
+  X <- cbind(rep(1,m), X)
+  
+  #apply every theta/params (each row from all_theta) to every each and every row in X
+  #For, e.g., apply all the different theta sets to the first row from X. It will give you the 
+  #probability of that row from X being one of the label(the thetas from all_thetas are for correct
+  #prediction of each label) . I have to transpose one or the other (all_theta or X...which one? 
+  #as i need to get a vector of probabilities for each label after multiplying them)
+  
+  #this will have the prediction prob in different col for a row from X. taking a max row wise will give
+  #us the required p 
+  pred_mat <- H(X %*% t(all_theta))
+  
+  p <- apply(pred_mat, 1, which.max)
+  p  
+}
+
+
+#this is the NN prediction. Note how in a couple of lines of Matrix multiplication we have encapsulated the NN forward propagation logic.
+predict <- function(Theta1, Theta2, X) {
+  #PREDICT Predict the label of an input given a trained neural network
+  #   p <- PREDICT(Theta1, Theta2, X) outputs the predicted label of X given the
+  #   trained weights of a neural network (Theta1, Theta2)
+  
+  #If there is only one example in the dataset which we have to predict, then transpose 
+  #the feature vector to transform it into a feature matrix type shape with 1 row and n cols
+  if (is.vector(X))
+    X <- t(X)
+  
+  m <- nrow(X)#no. of rows in dataset for which to predict(features as columns and rows as examples)
+  # add the dummy feature to the matrix of features(X...unlabeled data)
+  X <- cbind(rep(1,m), X)
+  
+  num_labels <- nrow(Theta2)
+  
+  # vector containing labels between 1 to num_labels. return this
+  p <- rep(0,m)
+  
+  z2 = X %*% t(Theta1)# we are applying the theta for all the different oneVsall classifiers to 
+  #each example and the resulting matrix is one which have columns=no. of labels and rows=no of 
+  #examples for which we have to predict
+  a2 <- cbind(rep(1,nrow(z2)), H(z2))#add dummy feature for calculating next layer nodes/features
+  
+  z3 <- a2 %*% t(Theta2)
+  #this will have the prediction probabilities in different cols for a row from a2. taking a max 
+  #row wise will give us the required p 
+  a3 <- H(z3)
+
+  p <- apply(a3, 1, which.max)
+  p
+}
+
+```
+
+Now talk about how we find the theta/params/weights for a NN. First its cost function
+![Multi class NN cost](./data/nn_classification_cost.png){#id .class width=90% height=40%}
+
+Remember: The number of columns in our current theta matrix is equal to the number of nodes in our current layer (including the bias unit). The number of rows in our current theta matrix is equal to the number of nodes in the next layer (excluding the bias unit). The double sum simply adds up the logistic regression costs calculated for each cell in the output layer. And the triple sum simply adds up the squares of all the individual Θs in the entire network. The i in the triple sum does not refer to training example i.
+
+Backpropagation optimization algo for minimizing the cost func J for NN: 
+![Multi class NN cost](./data/nn_backpropagation_optimization.png){#id .class width=50% height=40%}
+The name back propagation comes from the fact that we backpropagate the error from the output layer back into hidden layers to adjust the theta. Backpropagation stops at first hidden layer as the layer before that is the feature layer.
+![Multi class NN cost](./data/nn_optim_cost_and_derivatives.png){#id .class width=100% height=40%}
+Backpropagation algo:
+![Multi class NN cost](./data/nn_backpropagation_algo.png){#id .class width=50% height=40%}

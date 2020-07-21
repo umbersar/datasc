@@ -23,6 +23,5 @@ predictOneVsAll  <- function(all_theta, X) {
   pred_mat <- H(X %*% t(all_theta))
   
   p <- apply(pred_mat, 1, which.max)
-  
   p  
 }
