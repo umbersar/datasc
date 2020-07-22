@@ -512,3 +512,14 @@ The name back propagation comes from the fact that we backpropagate the error fr
 ![Multi class NN cost](./data/nn_optim_cost_and_derivatives.png){#id .class width=100% height=40%}
 Backpropagation algo:
 ![Multi class NN cost](./data/nn_backpropagation_algo.png){#id .class width=50% height=40%}
+
+Now to verify if the backpropagation algo is calculating derivatives which are correct(since the backpropagation algo is a bit complex, it is prone to mistakes), we can numerically check the gradients. The gradients/derivatives formula that we used in the backpropagation was derived using calculus(that means analytically??Yes, calculus is a analytical method to solve for a derivative). Thus the following eqn.s give us a way to numerically approximate a partial derivative (we could have done this as well in the place we used the the analytic derivative in gradient descent algo).
+Remember that analytical solution is exact and numerical is approximate.
+![Multi class NN cost](./data/numerical_gradients.png){#id .class width=90% height=40%}
+Once you have verified that the gradients calculated in backpropagation (using formula derived using calculus) are similar in values to gradient calculated numerically, disable the gradient checking and execute the backpropagation algo to completion. Numerical derivation is very slow as compared to analytic derivation and hence we want to disable it after checking.
+
+
+
+
+
+
