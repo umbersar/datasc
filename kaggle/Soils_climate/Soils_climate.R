@@ -1,6 +1,30 @@
 library(DBI)
+library(magrittr)
 con <- dbConnect(odbc::odbc(), Driver = "SQL Server", Server = "localhost\\sql2019", 
-    Database = "NatSoil", Trusted_Connection = "True")
+    Database = "DocumentData", Trusted_Connection = "True")
+
+blobs <- dbGetQuery(con,"select * from Blob")
+blobs$spectra[2]
+blobs$spectra[2][1]
+blobs$spectra[2][[1]]
+# result <- as.raw (blobs$spectra[2][[1]]) 
+# result <- as.raw (as.hexmode(blobs$spectra[2][[1]]) ) 
+
+rawToJpeg <- function(pic_data) {
+  f = file(paste0('c:/temp/OZTentRV4_Mesh.jpg'), "wb")           # OPEN FILE CONNECTION
+  # writeBin(pic_data, con = f, useBytes=TRUE)      # TRANSFER RAW DATA
+  writeBin(object = pic_data, con = f)      # TRANSFER RAW DATA
+  close(f)                                        # CLOSE FILE CONNECTION
+}
+
+rawToJpeg(result)
+rawToJpeg(blobs$spectra[2][[1]])
+
+binary = readBin ( 'C:/Users/sin17h/Pictures/Screenshots/TentWorldRV4.PNG', what = "raw", n = 1e6 ) 
+as.character(binary)%>%paste(collapse = "")
+
+blobs <- dbSendQuery(con,"insert into Blob(FileName,spectra) values(?,?)",
+                     list(FileName='testagain.jpg', spectra=as.character(binary)%>%paste(collapse = "")))
 
 # dbReadTable()
 # a <- dbExecute(con,"select * from Test")
