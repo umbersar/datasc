@@ -26,6 +26,9 @@ as.character(binary)%>%paste(collapse = "")
 blobs <- dbSendQuery(con,"insert into Blob(FileName,spectra) values(?,?)",
                      list(FileName='testagain.jpg', spectra=as.character(binary)%>%paste(collapse = "")))
 
+blobs <- dbGetQuery(con, "select name, file_stream from SharedFiles")
+rawToJpeg(blobs$file_stream[3][[1]])
+
 # dbReadTable()
 # a <- dbExecute(con,"select * from Test")
 Lab_results_pivoted <- dbGetQuery(con,"select * from Test")
