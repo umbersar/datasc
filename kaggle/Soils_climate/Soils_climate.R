@@ -1,3 +1,4 @@
+library(jsonlite)
 library(DBI)
 library(magrittr)
 con <- dbConnect(odbc::odbc(), Driver = "SQL Server", Server = "localhost\\sql2019", 
@@ -7,8 +8,25 @@ blobs <- dbGetQuery(con,"select * from Blob")
 blobs$spectra[2]
 blobs$spectra[2][1]
 blobs$spectra[2][[1]]
-# result <- as.raw (blobs$spectra[2][[1]]) 
-# result <- as.raw (as.hexmode(blobs$spectra[2][[1]]) ) 
+str(blobs$spectra[2][[1]])
+
+# sin17h@DATSUN-BM:/mnt/c/Users/sin17h$ curl --request  GET "https://localhost:5001/Spectra" -k
+con<-curl::curl(url="https://localhost:5001/Spectra" )
+open(con)
+out <- readLines(con, n=-1)#n = 3)
+cat(out, sep = "\n")
+data<-jsonlite::fromJSON("https://localhost:5001/Spectra")
+directFetch<-blobs$spectra[2][[1]]
+length(blobs$spectra[2][[1]])
+length(data$spectraBLOB)
+str(data$spectraBLOB)
+
+sst <- strsplit(data$spectraBLOB, "")[[1]]
+hex_string_vector <- paste0(sst[c(TRUE, FALSE)], sst[c(FALSE, TRUE)])
+rawaspnet_hex_vector = as.raw(as.hexmode(hex_string_vector))
+str(rawaspnet_hex_vector)
+hex_string_vector[(length(out)-10):length(out)]
+directFetch[(length(directFetch)-10):length(directFetch)]
 
 rawToJpeg <- function(pic_data) {
   f = file(paste0('c:/temp/OZTentRV4_Mesh.jpg'), "wb")           # OPEN FILE CONNECTION
@@ -19,6 +37,7 @@ rawToJpeg <- function(pic_data) {
 
 rawToJpeg(result)
 rawToJpeg(blobs$spectra[2][[1]])
+rawToJpeg(rawaspnet_hex_vector)
 
 binary = readBin ( 'C:/Users/sin17h/Pictures/Screenshots/TentWorldRV4.PNG', what = "raw", n = 1e6 ) 
 as.character(binary)%>%paste(collapse = "")
@@ -28,6 +47,9 @@ blobs <- dbSendQuery(con,"insert into Blob(FileName,spectra) values(?,?)",
 
 blobs <- dbGetQuery(con, "select name, file_stream from SharedFiles")
 rawToJpeg(blobs$file_stream[3][[1]])
+
+
+
 
 # dbReadTable()
 # a <- dbExecute(con,"select * from Test")
