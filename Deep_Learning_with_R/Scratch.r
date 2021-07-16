@@ -52,3 +52,9 @@ train_images <- mnist$train$x
 train_labels <- mnist$train$y
 test_images <- mnist$test$x
 test_labels <- mnist$test$y
+
+dim(train_images)
+length(dim(train_images))
+str(dim(train_images))
+train_images[5,,]
+plot(as.raster(train_images[5,,], max = 255))
