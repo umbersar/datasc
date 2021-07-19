@@ -263,3 +263,48 @@ sum(predictions[1,])
 max(predictions[1,])
 which(predictions[1,]==max(predictions[1,]))
 which.max(predictions[1,])
+
+model <- keras_model_sequential() %>%
+  layer_dense(units = 64, activation = "relu", input_shape = c(10000)) %>%
+  layer_dense(units = 4, activation = "relu") %>%
+  layer_dense(units = 46, activation = "softmax")
+
+model %>% compile(
+  optimizer = "rmsprop",
+  loss = "categorical_crossentropy",
+  metrics = c("accuracy")
+)
+
+model %>% fit(
+  partial_x_train,
+  partial_y_train,
+  epochs = 20,
+  batch_size = 128,
+  validation_data = list(x_val, y_val)
+)
+
+library(keras)
+
+dataset <- dataset_boston_housing()
+c(c(train_data, train_targets), c(test_data, test_targets)) %<-% dataset
+str(train_data)
+str(test_data)
+str(train_targets)
+
+mean <- apply(train_data, 2, mean)                                  
+std <- apply(train_data, 2, sd)
+train_data <- scale(train_data, center = mean, scale = std)         
+test_data <- scale(test_data, center = mean, scale = std)
+
+build_model <- function() {                                1
+  model <- keras_model_sequential() %>%
+    layer_dense(units = 64, activation = "relu",
+                input_shape = dim(train_data)[[2]]) %>%
+    layer_dense(units = 64, activation = "relu") %>%
+    layer_dense(units = 1)
+  model %>% compile(
+    optimizer = "rmsprop",
+    loss = "mse",
+    metrics = c("mae")
+  )
+}
