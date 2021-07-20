@@ -308,3 +308,61 @@ build_model <- function() {                                1
     metrics = c("mae")
   )
 }
+
+k <- 4
+indices <- sample(1:nrow(train_data))
+folds <- cut(indices, breaks = k, labels = FALSE)
+
+num_epochs <- 100
+all_scores <- c()
+for (i in 1:k) {
+  cat("processing fold #", i, "\n")
+  
+  val_indices <- which(folds == i, arr.ind = TRUE)                     
+  val_data <- train_data[val_indices,]
+  val_targets <- train_targets[val_indices]
+  partial_train_data <- train_data[-val_indices,]                      
+  partial_train_targets <- train_targets[-val_indices]
+  
+  model <- build_model()                                               
+  
+  model %>% fit(partial_train_data, partial_train_targets,             
+                epochs = num_epochs, batch_size = 1, verbose = 0)
+  
+  results <- model %>% evaluate(val_data, val_targets, verbose = 0)    
+  all_scores <- c(all_scores, results[2])
+}
+
+all_scores
+mean(all_scores)
+
+num_epochs <- 500
+all_mae_histories <- NULL
+for (i in 1:k) {
+  cat("processing fold #", i, "\n")
+  
+  val_indices <- which(folds == i, arr.ind = TRUE)              
+  val_data <- train_data[val_indices,]
+  val_targets <- train_targets[val_indices]
+  
+  partial_train_data <- train_data[-val_indices,]               
+  partial_train_targets <- train_targets[-val_indices]
+  
+  model <- build_model()                                        
+  
+  history <- model %>% fit(partial_train_data, partial_train_targets,
+                            validation_data = list(val_data, val_targets),
+                            epochs = num_epochs, batch_size = 1, verbose = 0)
+  
+  print(history$metrics[2]$mae)
+  print(str(history$metrics[2]$mae))
+  mae_history <- history$metrics[2]$mae
+  all_mae_histories <- rbind(all_mae_histories, mae_history)
+}
+
+
+average_mae_history <- data.frame(
+  epoch = seq(1:ncol(all_mae_histories)),
+  validation_mae = apply(all_mae_histories, 2, mean)
+)
+average_mae_history
